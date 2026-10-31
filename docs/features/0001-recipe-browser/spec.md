@@ -51,6 +51,9 @@ Preserve the recipe's text and formatted Markdown, including headings, ingredien
 and utensil bullets, numbered steps, notes, links, and inline code. Show servings
 and tags as metadata; hide raw YAML. Open external links outside the app.
 
+[F4 personal notes](../0004-recipe-notes/spec.md) adds a separate editable local
+text box after the complete source recipe. Source recipe content stays read-only.
+
 The current source contract is YAML schema version `1`, with fields
 `version_esquema`, `titulo`, `categoria`, `etiquetas`, and `raciones`.
 Treat servings as display text: existing values include nonnumeric descriptions.

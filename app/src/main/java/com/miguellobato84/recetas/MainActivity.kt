@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +29,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
@@ -86,16 +88,17 @@ class MainActivity : ComponentActivity() {
 private fun RecipeApp(
     browser: BrowserViewModel = viewModel(),
     shopping: ShoppingListViewModel = viewModel(),
+    notes: RecipeNotesViewModel = viewModel(),
 ) {
     var shoppingSelected by rememberSaveable { mutableStateOf(false) }
     val destinations = rememberSaveableStateHolder()
     BackHandler(shoppingSelected) { shoppingSelected = false }
-    Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+    Column(Modifier.fillMaxSize().safeDrawingPadding().imePadding()) {
         Box(Modifier.weight(1f).fillMaxWidth()) {
             if (shoppingSelected) destinations.SaveableStateProvider("shopping") {
                 ShoppingListScreen(shopping.state, shopping::clear)
             } else destinations.SaveableStateProvider("recipes") {
-                RecipeBrowser(browser, shopping.state, shopping::add)
+                RecipeBrowser(browser, shopping.state, shopping::add, notes)
             }
         }
         NavigationBar(windowInsets = WindowInsets(0, 0, 0, 0)) {
@@ -158,7 +161,8 @@ private fun ShoppingListScreen(state: ShoppingListState, clear: () -> Unit) {
 }
 
 @Composable
-private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState, add: (Recipe) -> Unit) {
+private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
+    add: (Recipe) -> Unit, notes: RecipeNotesViewModel) {
     val state = model.state
     val updateStatus by AppUpdateManager.status.collectAsState()
     var location by rememberSaveable { mutableStateOf("") }
@@ -195,7 +199,10 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState, 
         when {
             state.loading -> Unit
             state.recipes.isEmpty() -> Text("No hay recetas disponibles.", Modifier.padding(24.dp))
-            recipe != null -> key(recipe) { RecipeDetail(recipe, !shopping.loading && !shopping.loadFailed) { add(recipe) } }
+            recipe != null -> key(recipe.path) {
+                RecipeDetail(recipe, !shopping.loading && !shopping.loadFailed,
+                    { add(recipe) }, notes.state, { notes.edit(recipe.path, it) }, notes::retry)
+            }
             else -> key(visibleLocation) {
                 PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = model::refresh,
                     modifier = Modifier.fillMaxSize()) {
@@ -216,13 +223,37 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState, 
 }
 
 @Composable
-private fun RecipeDetail(recipe: Recipe, canAdd: Boolean, add: () -> Unit) {
+private fun RecipeDetail(recipe: Recipe, canAdd: Boolean, add: () -> Unit,
+    notes: RecipeNotesState, editNote: (String) -> Unit, retryNotes: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         TextButton(onClick = add, enabled = canAdd) { Text("Añadir a la lista de la compra") }
         Text("Raciones: ${recipe.servings}", style = MaterialTheme.typography.titleMedium)
         if (recipe.tags.isNotEmpty()) Text("Etiquetas: ${recipe.tags.joinToString(", ")}", style = MaterialTheme.typography.bodyMedium)
         MarkdownContent(recipe.path, recipe.markdown)
+        HorizontalDivider()
+        OutlinedTextField(
+            value = notes.notes[recipe.path].orEmpty(),
+            onValueChange = editNote,
+            label = { Text("Mis notas") },
+            placeholder = { Text("Escribe tus notas sobre esta receta") },
+            enabled = !notes.loading && !notes.loadFailed,
+            minLines = 3,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(notes.error ?: when {
+            notes.loading -> "Cargando notas…"
+            notes.saving || notes.dirty -> "Guardando notas…"
+            else -> "Notas guardadas en este dispositivo."
+        }, Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            style = MaterialTheme.typography.bodySmall,
+            color = if (notes.error != null) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.onSurfaceVariant)
+        if (notes.error != null) {
+            TextButton(onClick = retryNotes, enabled = !notes.loading && !notes.saving) {
+                Text("Reintentar")
+            }
+        }
     }
 }
 
