@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress
+Delivery: Released in v11 (device validation pending)
 
 ## Problem and intended outcome
 
@@ -42,8 +42,8 @@ cannot guarantee every update installs.
   with the requested unattended flow.
 - Rooting, managed-device provisioning, Play Store distribution, and external
   updater apps are outside this proposal.
-- Automatic startup checks introduce app-update network access; recipe data
-  remains strictly controlled by the manual refresh button.
+- Automatic startup checks introduce app-update network access; recipe snapshot
+  refresh follows F1’s startup-session behavior. There is no manual refresh button.
 
 ## Decision history
 
