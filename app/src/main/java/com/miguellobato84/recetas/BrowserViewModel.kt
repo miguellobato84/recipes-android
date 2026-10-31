@@ -24,6 +24,23 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
     var state by mutableStateOf(BrowserState())
         private set
 
+    fun refresh() {
+        if (state.loading || state.refreshing) return
+        viewModelScope.launch {
+            state = state.copy(refreshing = true, message = null, error = false)
+            try {
+                val recipes = withContext(Dispatchers.IO) { repository.refresh() }
+                state = state.copy(recipes = recipes, refreshing = false,
+                    message = "Recetas actualizadas.", error = false)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                state = state.copy(refreshing = false, error = true,
+                    message = "No se pudieron actualizar las recetas. Se conservan las guardadas. Desliza hacia abajo para reintentar.")
+            }
+        }
+    }
+
     init {
         viewModelScope.launch {
             startRecipeBrowser(

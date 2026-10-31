@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: Released (startup refresh: v8; first release: v6)
+Delivery: In progress (pull-to-refresh revision implemented locally; startup refresh: v8; first release: v6)
 
 ## Problem
 
@@ -19,7 +19,8 @@ a Pixel 10. The recipe repository remains the canonical source; the app is a rea
 - Spanish interface, Android 16+, app name **Recetas**.
 - Automatic startup download from public `miguellobato84/recipes`, branch `main`.
 - No bundled recipes; load the persistent cache first, then refresh on startup.
-- No refresh button; retain the cache and show a Spanish error on failure.
+- Refresh automatically on startup and by pulling down on a folder list; retain
+  the cache and show a Spanish error on failure.
 - Alphabetical folder navigation and complete recipe details.
 - Full cache replacement after download and validation succeed.
 - Signed APK distribution through GitHub Releases, triggered by pushes to `main`.
@@ -45,8 +46,9 @@ All disk, network, parsing, and rendering preparation run off the UI thread.
 ## Alternatives and tradeoffs
 
 - Bundled recipes remain excluded: the first startup downloads the public source.
-- Manual refresh was replaced by startup refresh at the owner's request; no
-  button, polling, or refresh on background resume is provided.
+- Manual refresh was replaced by startup refresh at the owner's request; a
+  pull-to-refresh gesture is available on folder lists. No refresh button,
+  polling, or refresh on background resume is provided.
 - Keeping deleted recipes was rejected: successful refresh mirrors the source.
 - App code in the recipe repository was rejected in favor of a separate repository.
 - Android 8 support was replaced by Android 16+ support for the owner's Pixel 10.
@@ -62,6 +64,7 @@ All disk, network, parsing, and rendering preparation run off the UI thread.
 | 2026-10-31 | Release on main pushes with integer tags | Replaces tag-triggered releases; tracked as scaffolding infrastructure. |
 | 2026-10-31 | Resolve F1 implementation decisions | Verified source commit `494130cd4dc66f0ef3095040830426e2a839d898`: 27 recipes, text and decimal servings, nested folders, and `desayunos`. Use bounded ZIP snapshots and native Markdown rendering; preserve cache on every pre-commit failure. |
 | 2026-10-31 | Refresh recipes on startup; remove Actualizar | Owner requested automatic refresh when opening the app. Cached recipes remain available during refresh and after failure. |
+| 2026-10-31 | Add pull-to-refresh on folder lists; remove Atrás button | Owner requested a gesture for refreshing and relies on Android system back navigation. |
 
 F1 is published in signed release [v6](https://github.com/miguellobato84/recipes-android/releases/tag/v6).
 The startup-refresh revision is published in signed release

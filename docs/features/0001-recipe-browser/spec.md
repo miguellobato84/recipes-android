@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: Released (startup refresh: v8; first release: v6)
+Delivery: In progress (pull-to-refresh revision implemented locally; startup refresh: v8; first release: v6)
 
 Related: [proposal](proposal.md)
 
@@ -35,8 +35,13 @@ Uninstalling the app or clearing its data is outside that persistence guarantee.
 
 Reflect recipe folders, including `desayunos` and nested folders such as
 `principales/carne`. List folders before recipes, with each group alphabetically
-ordered. Use recipe titles as recipe labels. Standard back navigation returns
-to the containing folder or previous screen.
+ordered. Use recipe titles as recipe labels. Android system back navigation
+(button or gesture) returns to the containing folder or previous screen; do not
+show an in-app **Atrás** button.
+
+Pulling down from the top of a folder list starts a recipe refresh. The gesture
+is available on folder lists only, not on recipe details or the shopping list.
+The cache remains browsable while refreshing and after a refresh failure.
 
 There is no search, category filter, or recipe editor.
 
@@ -71,8 +76,9 @@ does not change source recipes or enforce ingredient measurement conventions.
 
 Browsing must not read a partially downloaded or partially replaced snapshot.
 There is no refresh button, periodic background refresh, or repository setting.
-On failure, Spanish status tells the user to close and reopen the app to retry.
-No last-refresh timestamp is required by the accepted scope.
+The folder-list pull gesture starts one refresh when no refresh is already
+running. On failure, Spanish status explains that the cached recipes are kept
+and the user can pull down to retry. No last-refresh timestamp is required.
 
 ## APK delivery
 
@@ -93,6 +99,11 @@ and its delivery status.
   during a pending refresh and after an offline/error result.
 - Rotation/recomposition/background resume of the existing browsing session
   does not trigger another attempt. A new session retries once.
+- Pulling down at the top of a folder list starts a refresh; it is unavailable
+  on recipe details and the shopping list. Repeated gestures during a refresh
+  do not start concurrent refreshes.
+- Android system back returns to the parent folder or previous screen without
+  an in-app **Atrás** button.
 - A successful startup refresh enables category browsing and recipe details.
 - Folder hierarchy includes nested categories and `desayunos`; ordering follows
   the navigation rules.
@@ -286,3 +297,18 @@ implementation is present in the app; it remains separate from recipe refresh.
 | Date | State | Evidence |
 | --- | --- | --- |
 | 2026-10-31 | Released | Startup refresh without a manual button, commit `b18785a`, signed release `v8`, successful Actions run `41207316516`; 21 host tests and public APK verification passed. |
+
+### Pull-to-refresh revision (2026-10-31)
+
+Owner requested removal of the in-app **Atrás** button and pull-to-refresh on
+folder lists only. Android system back handling remains in place. Pull-to-refresh
+invokes the existing repository snapshot refresh, keeps cached recipes on
+failure, and cannot start a second refresh while one is active.
+
+Implementation is local and not released. `git diff --check` passed. The debug
+build could not run because no Android SDK location is configured in this
+workspace; unit, lint, and device validation remain outstanding.
+
+| Date | State | Evidence |
+| --- | --- | --- |
+| 2026-10-31 | In progress | Pull-to-refresh and navigation changes implemented locally; SDK unavailable for build verification. |

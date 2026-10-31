@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -168,11 +169,8 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState, 
     fun back() { location = visibleLocation.substringBeforeLast('/', "") }
     BackHandler(visibleLocation.isNotEmpty()) { back() }
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            if (visibleLocation.isNotEmpty()) TextButton(onClick = { back() }, modifier = Modifier.weight(1f)) { Text("Atrás") }
-            else Text("Recetas", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f).padding(12.dp))
-        }
+        if (visibleLocation.isEmpty()) Text("Recetas", style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.fillMaxWidth().padding(12.dp))
         if (state.loading || state.refreshing) {
             LinearProgressIndicator(Modifier.fillMaxWidth())
             Text(if (state.loading) "Cargando recetas guardadas…" else "Descargando y validando recetas…",
@@ -199,14 +197,17 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState, 
             state.recipes.isEmpty() -> Text("No hay recetas disponibles.", Modifier.padding(24.dp))
             recipe != null -> key(recipe) { RecipeDetail(recipe, !shopping.loading && !shopping.loadFailed) { add(recipe) } }
             else -> key(visibleLocation) {
-                LazyColumn(Modifier.fillMaxSize()) {
-                    items(folderEntries(state.recipes, visibleLocation), key = { it.path }) { entry ->
-                        ListItem(
-                            headlineContent = { Text(entry.label) },
-                            supportingContent = if (entry.isFolder) ({ Text("Carpeta") }) else null,
-                            trailingContent = { Text("›") },
-                            modifier = Modifier.clickable { location = entry.path },
-                        )
+                PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = model::refresh,
+                    modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(Modifier.fillMaxSize()) {
+                        items(folderEntries(state.recipes, visibleLocation), key = { it.path }) { entry ->
+                            ListItem(
+                                headlineContent = { Text(entry.label) },
+                                supportingContent = if (entry.isFolder) ({ Text("Carpeta") }) else null,
+                                trailingContent = { Text("›") },
+                                modifier = Modifier.clickable { location = entry.path },
+                            )
+                        }
                     }
                 }
             }
