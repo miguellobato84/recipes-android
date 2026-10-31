@@ -41,6 +41,9 @@ process recreation. Rotation reuses the session and preserves navigation.
 
 At each level, list folders before recipes, each alphabetically ordered using
 Spanish collation and path tie-breaking. Use recipe titles as recipe labels.
+Capitalize the first character of displayed folder/recipe labels, keeping all
+remaining characters intact. This is presentation only: source titles, paths,
+sorting and identity remain unchanged. Folder rows have no “Carpeta” subtitle.
 Indent rows by nesting level. The entire folder row toggles expansion; show a
 state arrow and expose Spanish expanded/collapsed state to accessibility.
 Multiple branches may stay open. Closing a folder clears expansion for all its
@@ -71,6 +74,7 @@ the scrolling content. Long titles wrap to two lines with ellipsis; expose the
 full title as an accessibility heading. Do not invent list actions.
 
 The list title is **Recetas**; detail uses the selected recipe's actual title,
+with its first character capitalized for display and remaining characters intact,
 not its category or repository path. Move the source H1 title into this header,
 without repeating it in the detail body. All remaining Markdown stays intact.
 Shopping and Share icons move to the right side of the detail header. The cart
@@ -79,7 +83,7 @@ uses **Lista de la compra** with its clear action on the right.
 ### Folder appearance
 
 Every folder row has a 40 dp rounded badge containing a 24 dp category icon.
-Folder names and the existing subtitle retain standard theme text colors. Keep
+Folder names retain standard theme text colors; omit the redundant subtitle. Keep
 the full-row toggle, state arrow, indentation, and Spanish accessibility state.
 The icon is decorative: the existing folder label identifies its meaning to
 TalkBack. Color is never the only category or expansion cue.
@@ -169,6 +173,10 @@ or the private key. See [scaffolding](../../scaffolding.md) for release automati
 and its delivery status.
 
 ## Acceptance criteria
+
+- Folder rows omit the “Carpeta” subtitle. List labels and screen-header titles
+  display an uppercase first character while preserving remaining text, source
+  titles, repository paths, ordering and navigation state.
 
 - List, detail and shopping use the shared header layout, with available action
   icons aligned right. Detail shows its actual recipe title once, in the header,
@@ -338,6 +346,19 @@ Delivery: Implemented locally; Android-device validation pending.
   font scaling, scroll behavior, TalkBack, tooltip gestures, touch targets and
   actual cart/share interactions remain untested on Android. No release was
   published for this revision.
+
+## List-label revision validation (2026-10-31)
+
+Implemented: folder rows no longer show “Carpeta”; list and shared-header titles
+capitalize their first character for display. Source labels, paths, sorting,
+badges and navigation state are unchanged.
+
+`./gradlew --no-daemon testDebugUnitTest lintRelease assembleDebug assembleRelease`
+passed with the existing Android SDK 36 and JDK 17: 54 offline tests passed and
+the opt-in live-source test was skipped. Lint reported zero errors and eight
+existing warnings; debug and optimized release builds passed. Source review and
+`git diff --check` passed. `adb devices` listed no device, so actual rendering,
+row height and accessibility interaction remain pending on Android.
 
 ## Delivery history
 

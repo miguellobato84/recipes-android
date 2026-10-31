@@ -22,6 +22,8 @@ a Pixel 10. The recipe repository remains the canonical source; the app is a rea
 - Refresh automatically on startup and by pulling down on the recipe tree; retain
   the cache and show a Spanish error on failure.
 - One expandable tree containing the full recipe hierarchy, initially collapsed in each new browsing session; separate complete recipe details.
+- Omit the redundant “Carpeta” subtitle. Capitalize the first character of list
+  titles and screen-header titles for display, preserving remaining text and source paths.
 - Automatic semantic icons and colored badges for every folder, with readable
   light/dark variants and stable neutral fallbacks for unknown categories.
 - Preserve expansion and scroll while opening details, switching to shopping, rotating, or refreshing. Collapsing a branch resets its descendants.
@@ -78,6 +80,7 @@ added folders start collapsed and removed recipes return to the tree.
 
 | Date | Decision | Rationale |
 | --- | --- | --- |
+| 2026-10-31 | Simplify list labels | Owner requested removing “Carpeta” beneath folders and capitalizing the first letter of titles. Apply display capitalization without changing source data or ordering. |
 | 2026-10-31 | Unify headers and remove recipe-refresh success banners | Owner requested matching list/detail/cart headers with actions on the right, recipe titles instead of category breadcrumbs, and recipe status messages only for errors. |
 | 2026-10-31 | Accept category badges after grilling | Owner confirmed automatic semantic colors/icons, independent nested identities, distinct sibling combinations, neutral fallbacks, and light/dark readability. |
 | 2026-10-31 | Accept initial scope | Owner confirmed the design after discussion. |

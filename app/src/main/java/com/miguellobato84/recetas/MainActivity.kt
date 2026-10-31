@@ -146,7 +146,7 @@ private fun ScreenHeader(title: String, actions: @Composable RowScope.() -> Unit
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(title, Modifier.weight(1f).semantics { heading() },
+        Text(title.replaceFirstChar { it.titlecase() }, Modifier.weight(1f).semantics { heading() },
             style = MaterialTheme.typography.headlineSmall,
             maxLines = 2, overflow = TextOverflow.Ellipsis)
         actions()
@@ -250,9 +250,8 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
                             val entry = row.entry
                             val isExpanded = entry.path in expanded
                             ListItem(
-                                headlineContent = { Text(entry.label) },
+                                headlineContent = { Text(entry.label.replaceFirstChar { it.titlecase() }) },
                                 leadingContent = if (entry.isFolder) ({ FolderBadge(folderAppearances.getValue(entry.path)) }) else null,
-                                supportingContent = if (entry.isFolder) ({ Text("Carpeta") }) else null,
                                 trailingContent = { Text(if (entry.isFolder && isExpanded) "▾" else "›",
                                     Modifier.clearAndSetSemantics { }) },
                                 modifier = Modifier.padding(start = (row.depth * 16).dp)
