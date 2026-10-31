@@ -20,7 +20,10 @@ browsing session starts the tree fully collapsed.
 
 ## Add ingredients from a recipe
 
-Add **Añadir a la lista de la compra** to recipe details. One tap contributes all
+Add an icon-only shopping-cart button to recipe details, beside Share as specified
+by [F5](../0005-recipe-sharing/spec.md). Preserve **Añadir a la lista de la compra**
+as its accessibility label and long-press tooltip, with a full-size touch target.
+One tap contributes all
 items from that recipe's **Ingredientes** section, including their quantities
 and notes. Utensils, steps, and other sections are not shopping items.
 
@@ -126,6 +129,7 @@ Android; record unavailable device checks explicitly.
 | --- | --- | --- |
 | 2026-10-31 | Not started | Four requested behaviors documented; implementation details remain proposed. No F3 implementation or runtime tests. |
 | 2026-10-31 | In progress | Accepted bottom navigation, saved browsing position, atomic local snapshots, source-path grouping, separate original ingredient contributions, latest-snapshot title, and immediate clear behavior before implementation. |
+| 2026-10-31 | Icon-only detail action implemented locally | F5 replaces the detail text button with a cart icon, Spanish spoken label and tooltip; existing enabled predicate and addition callback are retained. Host shopping regression tests pass; Android interaction checks remain pending. |
 
 ## Local validation (2026-10-31)
 

@@ -13,6 +13,7 @@ was first released in [v6](https://github.com/miguellobato84/recipes-android/rel
 | 0002 | Automatic app updates on startup | Accepted | Released (v11) | [Proposal](features/0002-startup-app-updates/proposal.md), [specification](features/0002-startup-app-updates/spec.md) |
 | 0003 | Shopping list | Accepted | In progress (implemented locally) | [Proposal](features/0003-shopping-list/proposal.md), [specification](features/0003-shopping-list/spec.md) |
 | 0004 | Personal recipe notes | Accepted | In progress (implemented locally; Android-device validation pending) | [Proposal](features/0004-recipe-notes/proposal.md), [specification](features/0004-recipe-notes/spec.md) |
+| 0005 | Share recipe link | Accepted | In progress (implemented locally; Android-device validation pending) | [Proposal](features/0005-recipe-sharing/proposal.md), [specification](features/0005-recipe-sharing/spec.md) |
 
 ## Workflow
 

@@ -112,8 +112,11 @@ fun survivingLocation(recipes: List<Recipe>, location: String): String {
     return current
 }
 
+fun recipeSourceUrl(recipePath: String): URI =
+    URI("https", "github.com", "/miguellobato84/recipes/blob/main/$recipePath", null)
+
 fun externalLink(recipePath: String, destination: String): URI? = runCatching {
-    val base = URI("https", "github.com", "/miguellobato84/recipes/blob/main/$recipePath", null)
+    val base = recipeSourceUrl(recipePath)
     val uri = base.resolve(destination)
     uri.takeIf { it.scheme.lowercase(Locale.ROOT) in setOf("http", "https") && !it.host.isNullOrBlank() }
 }.getOrNull()

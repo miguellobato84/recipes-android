@@ -29,6 +29,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.HorizontalDivider
@@ -57,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -253,9 +261,26 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
 @Composable
 private fun RecipeDetail(recipe: Recipe, canAdd: Boolean, add: () -> Unit,
     notes: RecipeNotesState, editNote: (String) -> Unit, retryNotes: () -> Unit) {
+    val context = LocalContext.current
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        TextButton(onClick = add, enabled = canAdd) { Text("Añadir a la lista de la compra") }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            RecipeActionIcon(R.drawable.ic_shopping_cart, "Añadir a la lista de la compra",
+                enabled = canAdd, onClick = add)
+            RecipeActionIcon(R.drawable.ic_share, "Compartir receta", onClick = {
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, recipeSourceUrl(recipe.path).toASCIIString())
+                }
+                try {
+                    context.startActivity(Intent.createChooser(intent, null))
+                } catch (_: ActivityNotFoundException) {
+                    Toast.makeText(context, "No se puede compartir esta receta.", Toast.LENGTH_LONG).show()
+                } catch (_: SecurityException) {
+                    Toast.makeText(context, "No se puede compartir esta receta.", Toast.LENGTH_LONG).show()
+                }
+            })
+        }
         Text("Raciones: ${recipe.servings}", style = MaterialTheme.typography.titleMedium)
         if (recipe.tags.isNotEmpty()) Text("Etiquetas: ${recipe.tags.joinToString(", ")}", style = MaterialTheme.typography.bodyMedium)
         MarkdownContent(recipe.path, recipe.markdown)
@@ -281,6 +306,20 @@ private fun RecipeDetail(recipe: Recipe, canAdd: Boolean, add: () -> Unit,
             TextButton(onClick = retryNotes, enabled = !notes.loading && !notes.saving) {
                 Text("Reintentar")
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RecipeActionIcon(icon: Int, label: String, enabled: Boolean = true, onClick: () -> Unit) {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(label) } },
+        state = rememberTooltipState(),
+    ) {
+        IconButton(onClick = onClick, enabled = enabled) {
+            Icon(painterResource(icon), contentDescription = label)
         }
     }
 }
