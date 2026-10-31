@@ -6,19 +6,19 @@ Personal, read-only Android app for browsing recipes from
 ## Behavior
 
 - Spanish interface, designed for Pixel 10 and Android 16+.
-- Empty on first launch. Tap **Actualizar** to download recipes from `main`.
+- Load cached recipes first, then refresh from `main` on startup. No refresh button.
 - Browse cached recipes by the repository's folder hierarchy, alphabetically.
 - Read formatted recipes with servings, tags, and external links.
-- Refresh manually. Failed refreshes show an error and preserve the cache.
+- Failed startup refreshes show an error and preserve the cache; reopen to retry.
 - Install signed APKs from GitHub Releases.
 
-No search, filters, editing, login, or background refresh.
+No search, filters, editing, login, or periodic background refresh.
 
 ## Project status
 
 Feature 0001 is released with Kotlin and Jetpack Compose: a Spanish
-recipe browser with manual snapshot download, validated atomic cache replacement,
-and offline reading. First F1 release: [v6](https://github.com/miguellobato84/recipes-android/releases/tag/v6).
+recipe browser with startup snapshot download, validated atomic cache replacement,
+and offline reading. Startup-refresh revision is in progress. First F1 release: [v6](https://github.com/miguellobato84/recipes-android/releases/tag/v6).
 Device rendering, installation,
 APK upgrade persistence, and Pixel 10 responsiveness still require device checks.
 

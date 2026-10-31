@@ -226,7 +226,8 @@ class RecipeTest {
                 }).refresh()
             }
             assertTrue(staged.await(5, TimeUnit.SECONDS))
-            assertEquals("Tortitas", SnapshotReader.read(File(dir, "recipes.zip")).single().title)
+            assertEquals("Tortitas", RecipeRepository(dir).load().single().title)
+            assertTrue(File(dir, "recipes.pending").exists())
             resume.countDown()
             assertEquals("Nuevo", pending.get(5, TimeUnit.SECONDS).single().title)
             assertEquals("Nuevo", RecipeRepository(dir).load().single().title)

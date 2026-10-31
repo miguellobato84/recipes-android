@@ -10,6 +10,9 @@ import java.nio.charset.CodingErrorAction
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import java.util.zip.CRC32
 import java.util.zip.ZipFile
 
@@ -114,15 +117,23 @@ class RecipeRepository(
         Files.move(staged.toPath(), active.toPath(), ATOMIC_MOVE, REPLACE_EXISTING)
     },
 ) {
+    private companion object {
+        val cacheLocks = ConcurrentHashMap<String, ReentrantLock>()
+    }
+    private val lock = cacheLocks.computeIfAbsent(directory.absoluteFile.normalize().path) { ReentrantLock() }
     private val active get() = File(directory, "recipes.zip")
     private val staged get() = File(directory, "recipes.pending")
 
-    @Synchronized fun load(): List<Recipe> {
-        Files.deleteIfExists(staged.toPath())
+    fun load(): List<Recipe> {
+        // A previous activity may still be finishing IO after its coroutine was cancelled.
+        // Read the atomically committed cache immediately; never erase live staging.
+        if (lock.tryLock()) {
+            try { Files.deleteIfExists(staged.toPath()) } finally { lock.unlock() }
+        }
         return if (active.exists()) SnapshotReader.read(active) else emptyList()
     }
 
-    @Synchronized fun refresh(): List<Recipe> {
+    fun refresh(): List<Recipe> = lock.withLock {
         if (!directory.isDirectory && !directory.mkdirs()) throw java.io.IOException("Cannot create cache")
         try {
             downloader.download(staged)
@@ -130,7 +141,7 @@ class RecipeRepository(
             FileOutputStream(staged, true).use { it.fd.sync() }
             commit(staged, active)
             // No failing work after commit: callers can now publish the complete new list.
-            return recipes
+            recipes
         } finally {
             // Cleanup must never turn a committed refresh into a reported failure.
             staged.delete()

@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
@@ -89,9 +88,6 @@ private fun RecipeBrowser(model: BrowserViewModel = viewModel()) {
             horizontalArrangement = Arrangement.SpaceBetween) {
             if (visibleLocation.isNotEmpty()) TextButton(onClick = { back() }, modifier = Modifier.weight(1f)) { Text("Atrás") }
             else Text("Recetas", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f).padding(12.dp))
-            Button(onClick = model::refresh, enabled = !state.loading && !state.refreshing) {
-                Text(if (state.refreshing) "Actualizando…" else "Actualizar")
-            }
         }
         if (state.loading || state.refreshing) {
             LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -110,7 +106,7 @@ private fun RecipeBrowser(model: BrowserViewModel = viewModel()) {
         HorizontalDivider()
         when {
             state.loading -> Unit
-            state.recipes.isEmpty() -> Text("No hay recetas guardadas. Pulsa Actualizar para descargarlas.", Modifier.padding(24.dp))
+            state.recipes.isEmpty() -> Text("No hay recetas disponibles.", Modifier.padding(24.dp))
             recipe != null -> key(recipe) { RecipeDetail(recipe) }
             else -> key(visibleLocation) {
                 LazyColumn(Modifier.fillMaxSize()) {

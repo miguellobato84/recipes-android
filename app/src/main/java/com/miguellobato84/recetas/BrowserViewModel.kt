@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,29 +26,11 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         viewModelScope.launch {
-            state = try {
-                BrowserState(recipes = withContext(Dispatchers.IO) { repository.load() }, loading = false)
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                BrowserState(loading = false, message = "No se pudieron leer las recetas guardadas. Pulsa Actualizar para recuperarlas.", error = true)
-            }
-        }
-    }
-
-    fun refresh() {
-        if (state.loading || state.refreshing) return
-        state = state.copy(refreshing = true, message = null, error = false)
-        viewModelScope.launch {
-            state = try {
-                val recipes = withContext(Dispatchers.IO) { repository.refresh() }
-                state.copy(recipes = recipes, refreshing = false, message = "Recetas actualizadas.", error = false)
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                state.copy(refreshing = false, error = true,
-                    message = "No se pudo actualizar. Comprueba la conexión e inténtalo de nuevo. Las recetas guardadas se conservan.")
-            }
+            startRecipeBrowser(
+                loadCache = { withContext(Dispatchers.IO) { repository.load() } },
+                refresh = { withContext(Dispatchers.IO) { repository.refresh() } },
+                publish = { state = it },
+            )
         }
     }
 }

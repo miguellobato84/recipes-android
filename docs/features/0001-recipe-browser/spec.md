@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: Released (first release: v6)
+Delivery: In progress (startup refresh revision; first release: v6)
 
 Related: [proposal](proposal.md)
 
@@ -15,8 +15,17 @@ Related: [proposal](proposal.md)
 
 ## First launch and cached browsing
 
-Start without bundled recipes. Show an empty state with **Actualizar**.
-Opening or restarting the app does not download recipes.
+Start without bundled recipes. Load the local cache first, then automatically
+attempt one recipe refresh when a new browsing session starts. A session starts
+when a new activity-scoped browser ViewModel is created. Rotation and Compose
+recomposition reuse that ViewModel; returning from the background to the same
+activity does not refresh again. Finishing the activity and reopening the app,
+or starting a new process, starts another session and refresh attempt.
+
+There is no **Actualizar** button. On a fresh install, show loading/progress until
+the initial attempt finishes. If it fails, show a Spanish error and remain empty.
+Cached recipes stay browsable while the startup refresh runs. No periodic
+refresh or additional automatic retry occurs within a session.
 
 After a successful refresh, browse only the persistent cache. Cached content
 survives app restarts and normal APK updates and remains readable offline.
@@ -50,9 +59,9 @@ files include `desayunos`, while its AGENTS.md category list omits it. Accepted
 app behavior follows actual recipe folders and includes `desayunos`. This app
 does not change source recipes or enforce ingredient measurement conventions.
 
-## Manual refresh
+## Startup refresh
 
-1. The user taps **Actualizar**.
+1. Load cached recipes, then begin one refresh for the new browsing session.
 2. Download one coherent snapshot of `miguellobato84/recipes`, branch `main`,
    using HTTPS without login or a device-side Git client.
 3. Stage and validate the complete recipe set before replacing the active cache.
@@ -61,7 +70,8 @@ does not change source recipes or enforce ingredient measurement conventions.
    and preserve the previous active cache. On a first-refresh failure, remain empty.
 
 Browsing must not read a partially downloaded or partially replaced snapshot.
-There are no background or launch-time refreshes and no repository settings.
+There is no refresh button, periodic background refresh, or repository setting.
+On failure, Spanish status tells the user to close and reopen the app to retry.
 No last-refresh timestamp is required by the accepted scope.
 
 ## APK delivery
@@ -69,7 +79,7 @@ No last-refresh timestamp is required by the accepted scope.
 Pushes to `main` trigger a GitHub Actions workflow that creates the next integer
 version tag (`v1`, `v2`, ...), builds and publishes a signed release APK to GitHub
 Releases. Installation is manual; recipe changes
-require only **Actualizar**, not a new APK.
+are fetched on startup without requiring a new APK.
 
 Use a dedicated release signing key across updates, retain a local backup, and
 store CI signing credentials in GitHub Actions secrets. Never commit credentials
@@ -78,8 +88,12 @@ and its delivery status.
 
 ## Acceptance criteria
 
-- Fresh install opens empty without a recipe network request.
-- A successful manual refresh enables category browsing and recipe details.
+- Fresh install automatically attempts to download recipes without any button.
+- Cache load precedes the one startup refresh; cached recipes remain visible
+  during a pending refresh and after an offline/error result.
+- Rotation/recomposition/background resume of the existing browsing session
+  does not trigger another attempt. A new session retries once.
+- A successful startup refresh enables category browsing and recipe details.
 - Folder hierarchy includes nested categories and `desayunos`; ordering follows
   the navigation rules.
 - Metadata and Markdown content remain readable without exposing YAML.
@@ -94,8 +108,9 @@ and its delivery status.
 
 ## Validation plan
 
-Test parsing against source fixtures, folder ordering, full cache replacement,
-and failure recovery. Exercise first launch, offline restart, refresh, navigation,
+Test cache-first startup, exactly one refresh per new session, pending-refresh
+browsing, startup success/failure/cancellation, parsing against source fixtures,
+folder ordering, full cache replacement, and failure recovery. Exercise first launch, offline restart, refresh, navigation,
 and APK updates on an emulator and, where available, the owner's Pixel 10.
 Measure release APK size, startup, and browsing responsiveness before claiming
 performance results. Documentation setup alone does not validate app behavior.
@@ -127,16 +142,21 @@ performance results. Documentation setup alone does not validate app behavior.
   the recipe's GitHub `main` blob URL and open externally. Other schemes show a
   Spanish error. Link opening is a separate explicit action, never a refresh.
 - Empty valid source replaces the cache with an empty collection. Empty UI says
-  there are no recipes and offers **Actualizar**. Invalid local cache shows a
-  Spanish error and remains empty until a successful explicit refresh.
+  there are no recipes. Invalid local cache shows a Spanish error while startup
+  refresh attempts recovery; success can restore a valid cache in that session.
 - Keep the downloaded ZIP in private app files, sync its staged bytes, then use
   an atomic same-directory rename to replace the active ZIP. Never fall back to
   non-atomic replacement. Publish new in-memory recipes only after that commit.
   Orphan staging files are discarded on next load; a killed process sees the old
   or the new complete ZIP. APK updates retain private files.
 - Lifecycle ViewModel 2.9.4 owns work across rotation. Load/cache work runs on IO;
-  Markdown spans prepare off the UI thread. Refresh is disabled while loading or
-  refreshing; concurrent repository refresh calls serialize. During refresh,
+  Markdown spans prepare off the UI thread. Its initialization runs cache load
+  then one refresh; there is no public UI refresh action. Existing ViewModel
+  retention prevents rotation/recomposition from starting duplicate work.
+  Concurrent refresh calls across sessions serialize through a per-cache-directory
+  lock. Loading the active cache does not wait for a previous session's download
+  or delete its staging file. Orphan staging files are cleaned only when no
+  refresh owns that directory. During refresh,
   cached recipes remain browsable. Progress and persistent Spanish error/success
   status appear above content. After success, keep the current folder/detail if
   it still exists; return to its nearest surviving parent otherwise.
@@ -146,7 +166,7 @@ performance results. Documentation setup alone does not validate app behavior.
   saved instance restoration. Honor system font scaling, insets and light/dark
   theme. Preserve existing launcher artwork and release/signing setup.
 
-## Validation evidence (2026-10-31)
+## Original manual-refresh release validation (2026-10-31)
 
 - `VERIFY_LIVE_RECIPES=1 ./gradlew --no-daemon testDebugUnitTest lintRelease
   assembleRelease` passed with JDK 17.0.19 and SDK/build tools 36/35.0.0.
@@ -214,3 +234,37 @@ Host tests and successful builds do not establish those device outcomes.
 | Date | State | Evidence |
 | --- | --- | --- |
 | 2026-10-31 | Released | F1 commit `7737121`, signed release `v6`, successful Actions run `41206097280`; public APK checksum, signature identity, package and version verified. |
+
+## Startup refresh revision (2026-10-31)
+
+Decision: Accepted. Delivery: Implemented locally; release pending.
+
+Owner requested removing **Actualizar** and refreshing recipes on startup.
+This revises F1 in place; APK self-updates remain a separate F2 proposal.
+The original manual-refresh evidence above remains historical and does not
+establish the new startup behavior. New checks and device gaps are recorded below.
+
+Cross-reference conflict: the separate, uncommitted F2 draft still describes an
+explicit **Actualizar** action. This owner-requested F1 revision supersedes those
+recipe-refresh references. F2 draft files remain untouched and F2 has no runtime
+implementation in this change.
+
+### Startup revision validation
+
+- `VERIFY_LIVE_RECIPES=1 ./gradlew --no-daemon testDebugUnitTest lintRelease
+  assembleRelease` passed: 20 offline tests plus the live 27-recipe import.
+- Six startup-flow tests verify cache visibility before a suspended download
+  completes, one attempt per fresh session, empty-install automatic download,
+  offline/invalid-snapshot cache retention, unreadable-cache recovery, and
+  cancellation propagation without false error/retry states.
+- The repository concurrency test now reopens through a second repository while
+  a download is paused. It verifies immediate old-cache access and retention of
+  the live staging file, followed by a complete replacement after commit.
+- Source inspection confirms no refresh button/action or obsolete button-guidance
+  text in the UI/ViewModel. Lint and the R8 optimized build passed. Unsigned
+  development APK: 1,793,579 bytes. Existing launcher, workflow and signing
+  setup are unchanged. F2 draft files are excluded from this revision.
+- No Android device/emulator is connected (`adb devices` is empty). Actual startup
+  UI, rotation/background lifecycle behavior, Android networking and device
+  close/reopen behavior remain untested; host flow/concurrency tests do not
+  establish those Android outcomes.
