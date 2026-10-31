@@ -183,6 +183,7 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
     ) { mutableStateOf(emptySet<String>()) }
     val treeScroll = rememberLazyListState()
     val tree = remember(state.recipes) { RecipeTree(state.recipes) }
+    val folderAppearances = remember(tree.folders) { FolderAppearances.forFolders(tree.folders) }
     val expanded = remember(tree, expandedFolders) { expandedFolders.intersect(tree.folders) }
     val rows = remember(tree, expanded) { tree.visibleEntries(expanded) }
     val recipe = state.recipes.firstOrNull { it.path == selectedPath }
@@ -233,6 +234,7 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
                             val isExpanded = entry.path in expanded
                             ListItem(
                                 headlineContent = { Text(entry.label) },
+                                leadingContent = if (entry.isFolder) ({ FolderBadge(folderAppearances.getValue(entry.path)) }) else null,
                                 supportingContent = if (entry.isFolder) ({ Text("Carpeta") }) else null,
                                 trailingContent = { Text(if (entry.isFolder && isExpanded) "▾" else "›",
                                     Modifier.clearAndSetSemantics { }) },

@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress (tree navigation implemented locally; Android-device validation pending; startup refresh: v8; first release: v6)
+Delivery: In progress (tree navigation and category badges implemented locally; Android-device validation pending; startup refresh: v8; first release: v6)
 
 ## Problem
 
@@ -22,6 +22,8 @@ a Pixel 10. The recipe repository remains the canonical source; the app is a rea
 - Refresh automatically on startup and by pulling down on the recipe tree; retain
   the cache and show a Spanish error on failure.
 - One expandable tree containing the full recipe hierarchy, initially collapsed in each new browsing session; separate complete recipe details.
+- Automatic semantic icons and colored badges for every folder, with readable
+  light/dark variants and stable neutral fallbacks for unknown categories.
 - Preserve expansion and scroll while opening details, switching to shopping, rotating, or refreshing. Collapsing a branch resets its descendants.
 - Full cache replacement after download and validation succeed.
 - Signed APK distribution through GitHub Releases, triggered by pushes to `main`.
@@ -71,6 +73,7 @@ added folders start collapsed and removed recipes return to the tree.
 
 | Date | Decision | Rationale |
 | --- | --- | --- |
+| 2026-10-31 | Accept category badges after grilling | Owner confirmed automatic semantic colors/icons, independent nested identities, distinct sibling combinations, neutral fallbacks, and light/dark readability. |
 | 2026-10-31 | Accept initial scope | Owner confirmed the design after discussion. |
 | 2026-10-31 | Begin with repository and documentation | App implementation is deferred until after this setup. |
 | 2026-10-31 | Release on main pushes with integer tags | Replaces tag-triggered releases; tracked as scaffolding infrastructure. |

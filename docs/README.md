@@ -9,7 +9,7 @@ was first released in [v6](https://github.com/miguellobato84/recipes-android/rel
 
 | ID | Feature | Decision | Delivery | Documents |
 | --- | --- | --- | --- | --- |
-| 0001 | Read-only recipe browser | Accepted | In progress (tree navigation implemented locally; Android-device validation pending) | [Proposal](features/0001-recipe-browser/proposal.md), [specification](features/0001-recipe-browser/spec.md) |
+| 0001 | Read-only recipe browser | Accepted | In progress (tree navigation and category badges implemented locally; Android-device validation pending) | [Proposal](features/0001-recipe-browser/proposal.md), [specification](features/0001-recipe-browser/spec.md) |
 | 0002 | Automatic app updates on startup | Accepted | Released (v11) | [Proposal](features/0002-startup-app-updates/proposal.md), [specification](features/0002-startup-app-updates/spec.md) |
 | 0003 | Shopping list | Accepted | In progress (implemented locally) | [Proposal](features/0003-shopping-list/proposal.md), [specification](features/0003-shopping-list/spec.md) |
 | 0004 | Personal recipe notes | Accepted | In progress (implemented locally; Android-device validation pending) | [Proposal](features/0004-recipe-notes/proposal.md), [specification](features/0004-recipe-notes/spec.md) |

@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress (tree navigation implemented locally; Android-device validation pending; startup refresh: v8; first release: v6)
+Delivery: In progress (tree navigation and category badges implemented locally; Android-device validation pending; startup refresh: v8; first release: v6)
 
 Related: [proposal](proposal.md)
 
@@ -61,6 +61,44 @@ otherwise return to the tree. Cached content remains browsable during refresh
 and after failure. Empty collections show the existing Spanish empty state.
 
 There is no search, category filter, or recipe editor.
+
+### Folder appearance
+
+Every folder row has a 40 dp rounded badge containing a 24 dp category icon.
+Folder names and the existing subtitle retain standard theme text colors. Keep
+the full-row toggle, state arrow, indentation, and Spanish accessibility state.
+The icon is decorative: the existing folder label identifies its meaning to
+TalkBack. Color is never the only category or expansion cue.
+
+Assign appearance automatically in the app; no picker, network lookup, source
+metadata, or appearance preferences are required. Match the final folder name
+case/accent insensitively, including nested categories, without inheriting the
+parent's identity. Use these semantic mappings:
+
+| Category | Color family | Icon |
+| --- | --- | --- |
+| desayunos | Amber | Sunrise |
+| dulces | Pink | Cake |
+| entrantes | Teal | Small plate |
+| guarniciones | Olive | Bowl |
+| masas | Wheat | Rolling pin |
+| panificadora | Toast brown | Bread |
+| principales | Burnt orange | Covered dish |
+| carne | Brick red | Meat |
+| pescado | Blue | Fish |
+| vegetarianos | Green | Leaf |
+| salsas | Purple | Sauce boat |
+
+Unknown folder names receive a neutral folder icon with a muted, path-derived
+badge. Resolve duplicate sibling icon/color combinations deterministically with
+nearby shades, preserving the category color family. Assignment uses all folder
+paths, including collapsed branches, and is stable across restarts for the same
+hierarchy, input ordering, expansion, and recipe-content changes. Siblings have
+distinct combinations; reuse across separate parents is allowed.
+
+Provide explicit light/dark foreground and background pairs. Require at least
+3:1 icon-to-badge contrast in both modes; retain theme-managed text contrast.
+Exact light and dark shades can differ while retaining their conceptual hue.
 
 ## Recipe details and source format
 
@@ -132,6 +170,12 @@ and its delivery status.
 - A successful startup refresh enables category browsing and recipe details.
 - Folder hierarchy includes nested categories and `desayunos`; ordering follows
   the navigation rules.
+- Every folder, including arbitrary nested/new categories, has an automatic
+  icon/color badge matching the rules above. Sibling combinations are distinct.
+- Category identities remain deterministic across restarts, input ordering,
+  expansion, and recipe-only refreshes; unknown categories remain usable offline.
+- Both light/dark icon pairs meet 3:1 contrast. Names retain theme text colors;
+  badges do not add duplicate accessibility announcements or alter row actions.
 - Metadata and Markdown content remain readable without exposing YAML.
 - Airplane mode permits browsing after a successful refresh and app restart.
 - Network failure and an invalid recipe each preserve the complete old cache
@@ -369,3 +413,41 @@ state. Implemented locally; not published. Validation:
 | Date | State | Evidence |
 | --- | --- | --- |
 | 2026-10-31 | Implemented locally, not released | 47 offline tests, debug/release builds and release lint passed. Tree/session navigation source reviewed; Android interaction/restoration/accessibility checks remain pending. |
+
+### Category badge revision (2026-10-31)
+
+Implemented the owner-approved semantic mappings as twelve local vector icons
+(eleven categories plus neutral folder), with automatic path-based assignment,
+explicit light/dark palettes, and deterministic sibling collision resolution.
+Category matching uses the final path component with case/accent normalization.
+Folder text, full-row actions, expansion state, and arrows retain their existing
+behavior. Decorative icons have no separate accessibility description.
+
+Validation:
+
+- `ANDROID_HOME="$HOME/.cache/recipes-android-sdk" ./gradlew --no-daemon
+  testDebugUnitTest lintRelease assembleDebug assembleRelease` passed with
+  JDK 17.0.19, platform 36, and build tools 35.0.0. The shell initially had no
+  configured SDK; the required packages were downloaded from Google's Android
+  repository, checked against its published archive checksums, and installed
+  outside the checkout. No project build settings or dependencies changed.
+- 54 offline JVM tests passed; one opt-in live-source test was skipped. Five new
+  tests cover semantic/nested/case/accent mappings, order and recipe-only refresh
+  stability, hash and normalized-name collisions, more than 5,000 unknown sibling
+  categories, light/dark icon contrast, and badges for every folder in the pinned
+  27-recipe fixture. Contrast tests check 3:1 at worst-case per-channel shade
+  endpoints, covering all possible generated collision shades.
+- Release lint passed with zero errors and eight existing warnings (dependency
+  versions, backup configuration, icon SDK qualifier, and URI style). Both APK
+  builds passed; the unsigned release APK is 2,339,535 bytes.
+- Rendered and visually inspected a two-theme resource preview generated from
+  the actual vector paths and palette constants, available locally in
+  `app/build/reports/folder-badges.png`. This is a resource preview, not an Android
+  screenshot. `git diff --check` passed.
+- `adb devices` lists no connected devices. Android rendering, touch/expansion,
+  font scaling, and TalkBack behavior remain untested on-device. No release was
+  published. Host tests and the resource preview do not establish device results.
+
+| Date | State | Evidence |
+| --- | --- | --- |
+| 2026-10-31 | Implemented locally, not released | 54 offline tests, debug/release builds, lint, generated-shade contrast checks, and two-theme vector preview passed; Android-device validation pending. |
