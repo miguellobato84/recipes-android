@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress (implemented locally; not released)
+Delivery: Released (first release: v6)
 
 Related: [proposal](proposal.md)
 
@@ -187,7 +187,7 @@ Therefore app launch/rendering, touch/back navigation, rotation/process restore,
 TalkBack/font scaling/light-dark appearance, link intents, airplane-mode restart,
 Android-filesystem atomic rename behavior, and same-signature APK upgrade cache
 retention have not been exercised on Android. Startup and browsing latency on
-Pixel 10 are unmeasured. A signed F1 release and its Actions run are also pending.
+Pixel 10 are unmeasured. Signed F1 release validation is recorded below.
 Host tests and successful builds do not establish those device outcomes.
 
 ## Delivery history
@@ -197,3 +197,20 @@ Host tests and successful builds do not establish those device outcomes.
 | 2026-10-31 | Not started | Scope recorded; no app implementation or release. |
 | 2026-10-31 | In progress | Resolved implementation decisions from verified source facts before coding. |
 | 2026-10-31 | Implemented locally, not released | Fourteen acceptance tests, live 27-recipe import, five release-version tests, lint and optimized build passed. Device checks and publication remain pending. |
+
+### First published F1 release
+
+- Implementation commit: [`77371217c20997025a56a312d0c29b93acd18070`](https://github.com/miguellobato84/recipes-android/commit/77371217c20997025a56a312d0c29b93acd18070).
+- Tag and release: [`v6`](https://github.com/miguellobato84/recipes-android/releases/tag/v6)
+  points to that exact commit. [Actions run 41206097280](https://github.com/miguellobato84/recipes-android/actions/runs/41206097280)
+  completed successfully, including version tests, Android lint, optimized signed
+  build, signature/package checks, artifact upload, and release publication.
+- Downloaded public APK and checksum. SHA-256 matches the checksum asset;
+  `apksigner verify --print-certs` passes. Certificate SHA-256 equals the verified
+  `v5` APK certificate. Package is `com.miguellobato84.recetas`, versionCode and
+  versionName are `6`, minimum SDK is `36`. Signed APK size: 1,801,775 bytes.
+- Release verification does not establish the outstanding device checks above.
+
+| Date | State | Evidence |
+| --- | --- | --- |
+| 2026-10-31 | Released | F1 commit `7737121`, signed release `v6`, successful Actions run `41206097280`; public APK checksum, signature identity, package and version verified. |

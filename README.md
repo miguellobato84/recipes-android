@@ -16,9 +16,10 @@ No search, filters, editing, login, or background refresh.
 
 ## Project status
 
-Feature 0001 is implemented locally with Kotlin and Jetpack Compose: a Spanish
+Feature 0001 is released with Kotlin and Jetpack Compose: a Spanish
 recipe browser with manual snapshot download, validated atomic cache replacement,
-and offline reading. Release publication is in progress. Device rendering, installation,
+and offline reading. First F1 release: [v6](https://github.com/miguellobato84/recipes-android/releases/tag/v6).
+Device rendering, installation,
 APK upgrade persistence, and Pixel 10 responsiveness still require device checks.
 
 ## Build

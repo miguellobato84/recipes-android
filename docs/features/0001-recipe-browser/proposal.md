@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress (implemented locally; not released)
+Delivery: Released (first release: v6)
 
 ## Problem
 
@@ -60,7 +60,8 @@ All disk, network, parsing, and rendering preparation run off the UI thread.
 | 2026-10-31 | Release on main pushes with integer tags | Replaces tag-triggered releases; tracked as scaffolding infrastructure. |
 | 2026-10-31 | Resolve F1 implementation decisions | Verified source commit `494130cd4dc66f0ef3095040830426e2a839d898`: 27 recipes, text and decimal servings, nested folders, and `desayunos`. Use bounded ZIP snapshots and native Markdown rendering; preserve cache on every pre-commit failure. |
 
-Implementation and host validation are complete locally. Device acceptance and
-release publication remain pending; see the specification for evidence and gaps.
+F1 is published in signed release [v6](https://github.com/miguellobato84/recipes-android/releases/tag/v6).
+Host and release validation passed. Device acceptance remains pending; see the
+specification for evidence and gaps.
 
 See [the specification](spec.md) for behavior and acceptance criteria.
