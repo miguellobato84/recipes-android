@@ -33,7 +33,7 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
             try {
                 val recipes = withContext(Dispatchers.IO) { repository.refresh() }
                 state = state.copy(recipes = recipes, refreshing = false,
-                    message = "Recetas actualizadas.", error = false)
+                    message = null, error = false)
             } catch (cancelled: kotlinx.coroutines.CancellationException) {
                 throw cancelled
             } catch (_: Exception) {

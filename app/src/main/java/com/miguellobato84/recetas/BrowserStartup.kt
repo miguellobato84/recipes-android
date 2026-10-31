@@ -19,7 +19,7 @@ internal suspend fun startRecipeBrowser(
     publish(cached)
     val result = try {
         cached.copy(recipes = refresh(), refreshing = false, error = false,
-            message = "Recetas actualizadas.")
+            message = null)
     } catch (cancelled: CancellationException) {
         throw cancelled
     } catch (_: Exception) {

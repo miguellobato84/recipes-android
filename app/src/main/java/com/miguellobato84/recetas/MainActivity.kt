@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -32,6 +34,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -61,6 +64,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -68,10 +72,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.noties.markwon.AbstractMarkwonPlugin
@@ -80,6 +86,7 @@ import io.noties.markwon.MarkwonConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.commonmark.node.Image
+import org.commonmark.node.Heading
 import org.commonmark.node.Node
 import org.commonmark.node.Text as MarkdownText
 
@@ -133,15 +140,29 @@ private fun ShoppingStatus(state: ShoppingListState) {
 }
 
 @Composable
+private fun ScreenHeader(title: String, actions: @Composable RowScope.() -> Unit = {}) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(horizontal = 20.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(title, Modifier.weight(1f).semantics { heading() },
+            style = MaterialTheme.typography.headlineSmall,
+            maxLines = 2, overflow = TextOverflow.Ellipsis)
+        actions()
+    }
+    HorizontalDivider()
+}
+
+@Composable
 private fun ShoppingListScreen(state: ShoppingListState, clear: () -> Unit) {
     val groups = remember(state.additions) { shoppingRecipeGroups(state.additions) }
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Lista de la compra", Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall)
-            TextButton(onClick = clear, enabled = !state.loading && !state.loadFailed) { Text("Vaciar") }
+        ScreenHeader("Lista de la compra") {
+            HeaderActionIcon(R.drawable.ic_delete, "Vaciar carrito",
+                enabled = !state.loading && !state.loadFailed, filled = true, onClick = clear)
         }
         ShoppingStatus(state)
-        HorizontalDivider()
         when {
             state.loading -> Text("Cargando lista de la compra…", Modifier.padding(20.dp))
             state.loadFailed -> Unit
@@ -195,14 +216,16 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
     }
     BackHandler(recipe != null) { selectedPath = "" }
     Column(Modifier.fillMaxSize()) {
-        if (recipe == null) Text("Recetas", style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.fillMaxWidth().padding(12.dp))
+        ScreenHeader(recipe?.title ?: "Recetas") {
+            if (recipe != null) RecipeHeaderActions(recipe, !shopping.loading && !shopping.loadFailed,
+                add = { add(recipe) })
+        }
         if (state.loading || state.refreshing) {
             LinearProgressIndicator(Modifier.fillMaxWidth())
             Text(if (state.loading) "Cargando recetas guardadas…" else "Descargando y validando recetas…",
                 Modifier.padding(horizontal = 20.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
         }
-        state.message?.let {
+        state.message?.takeIf { state.error }?.let {
             Text(it, Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                 .semantics { liveRegion = LiveRegionMode.Polite },
                 color = if (state.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
@@ -213,17 +236,11 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
                 color = if (updateStatus.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
         }
         ShoppingStatus(shopping)
-        if (recipe != null) {
-            Text(recipe.path.substringBeforeLast('/', "").replace("/", " / "), Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                style = MaterialTheme.typography.titleMedium)
-        }
-        HorizontalDivider()
         when {
             state.loading -> Unit
             state.recipes.isEmpty() -> Text("No hay recetas disponibles.", Modifier.padding(24.dp))
             recipe != null -> key(recipe.path) {
-                RecipeDetail(recipe, !shopping.loading && !shopping.loadFailed,
-                    { add(recipe) }, notes.state, { notes.edit(recipe.path, it) }, notes::retry)
+                RecipeDetail(recipe, notes.state, { notes.edit(recipe.path, it) }, notes::retry)
             }
             else -> {
                 PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = model::refresh,
@@ -261,31 +278,33 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
 }
 
 @Composable
-private fun RecipeDetail(recipe: Recipe, canAdd: Boolean, add: () -> Unit,
-    notes: RecipeNotesState, editNote: (String) -> Unit, retryNotes: () -> Unit) {
+private fun RecipeHeaderActions(recipe: Recipe, canAdd: Boolean, add: () -> Unit) {
     val context = LocalContext.current
+    HeaderActionIcon(R.drawable.ic_shopping_cart, "Añadir a la lista de la compra",
+        enabled = canAdd, onClick = add)
+    HeaderActionIcon(R.drawable.ic_share, "Compartir receta", onClick = {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, recipeSourceUrl(recipe.path).toASCIIString())
+        }
+        try {
+            context.startActivity(Intent.createChooser(intent, null))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(context, "No se puede compartir esta receta.", Toast.LENGTH_LONG).show()
+        } catch (_: SecurityException) {
+            Toast.makeText(context, "No se puede compartir esta receta.", Toast.LENGTH_LONG).show()
+        }
+    })
+}
+
+@Composable
+private fun RecipeDetail(recipe: Recipe, notes: RecipeNotesState,
+    editNote: (String) -> Unit, retryNotes: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            RecipeActionIcon(R.drawable.ic_shopping_cart, "Añadir a la lista de la compra",
-                enabled = canAdd, onClick = add)
-            RecipeActionIcon(R.drawable.ic_share, "Compartir receta", onClick = {
-                val intent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, recipeSourceUrl(recipe.path).toASCIIString())
-                }
-                try {
-                    context.startActivity(Intent.createChooser(intent, null))
-                } catch (_: ActivityNotFoundException) {
-                    Toast.makeText(context, "No se puede compartir esta receta.", Toast.LENGTH_LONG).show()
-                } catch (_: SecurityException) {
-                    Toast.makeText(context, "No se puede compartir esta receta.", Toast.LENGTH_LONG).show()
-                }
-            })
-        }
         Text("Raciones: ${recipe.servings}", style = MaterialTheme.typography.titleMedium)
         if (recipe.tags.isNotEmpty()) Text("Etiquetas: ${recipe.tags.joinToString(", ")}", style = MaterialTheme.typography.bodyMedium)
-        MarkdownContent(recipe.path, recipe.markdown)
+        MarkdownContent(recipe.path, recipe.markdown, titleInHeader = true)
         HorizontalDivider()
         OutlinedTextField(
             value = notes.notes[recipe.path].orEmpty(),
@@ -314,32 +333,37 @@ private fun RecipeDetail(recipe: Recipe, canAdd: Boolean, add: () -> Unit,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun RecipeActionIcon(icon: Int, label: String, enabled: Boolean = true, onClick: () -> Unit) {
+private fun HeaderActionIcon(icon: Int, label: String, enabled: Boolean = true,
+    filled: Boolean = false, onClick: () -> Unit) {
     TooltipBox(
         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         tooltip = { PlainTooltip { Text(label) } },
         state = rememberTooltipState(),
     ) {
-        IconButton(onClick = onClick, enabled = enabled) {
+        val content: @Composable () -> Unit = {
             Icon(painterResource(icon), contentDescription = label)
         }
+        if (filled) FilledTonalIconButton(onClick = onClick, enabled = enabled, content = content)
+        else IconButton(onClick = onClick, enabled = enabled, content = content)
     }
 }
 
 @Composable
-private fun MarkdownContent(sourcePath: String, markdown: String) {
+private fun MarkdownContent(sourcePath: String, markdown: String, titleInHeader: Boolean = false) {
     val context = LocalContext.current
     val color = MaterialTheme.colorScheme.onSurface.toArgb()
     val density = LocalDensity.current
     val textSizePx = with(density) { MaterialTheme.typography.bodyLarge.fontSize.toPx() }
-    val markwon = remember(sourcePath) {
+    val markwon = remember(sourcePath, titleInHeader) {
         Markwon.builder(context).usePlugin(object : AbstractMarkwonPlugin() {
             override fun beforeRender(node: Node) {
                 fun replaceImages(parent: Node) {
                     var child = parent.firstChild
                     while (child != null) {
                         val next = child.next
-                        if (child is Image) {
+                        if (titleInHeader && parent === node && child is Heading && child.level == 1) {
+                            child.unlink()
+                        } else if (child is Image) {
                             val alt = StringBuilder()
                             fun collect(node: Node) {
                                 if (node is MarkdownText) alt.append(node.literal)

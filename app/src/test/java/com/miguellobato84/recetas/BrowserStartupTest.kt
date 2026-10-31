@@ -33,6 +33,7 @@ class BrowserStartupTest {
         assertEquals(listOf(updated), states.last().recipes)
         assertFalse(states.last().refreshing)
         assertFalse(states.last().error)
+        assertNull(states.last().message)
         assertEquals(2, states.size)
     }
 
@@ -85,6 +86,7 @@ class BrowserStartupTest {
         assertTrue(states.first().refreshing)
         assertEquals(listOf(updated), states.last().recipes)
         assertFalse(states.last().error)
+        assertNull(states.last().message)
     }
 
     @Test fun `cancelled session is not reported as download failure or retried`() = runBlocking {

@@ -9,10 +9,11 @@ Related: [proposal](proposal.md), [recipe browser](../0001-recipe-browser/spec.m
 
 ## Observable behavior and data contract
 
-Recipe details begin with side-by-side icon-only shopping-cart and Share buttons.
+Recipe details use the shared screen header, with the recipe title on the left
+and side-by-side icon-only shopping-cart and Share buttons on the right.
 Expose labels “Añadir a la lista de la compra” and “Compartir receta” to
 accessibility and through long-press tooltips. Touch targets are at least 48 dp.
-Retry and other screens retain their current presentation.
+Retry retains its current presentation. The cart header follows F3.
 
 Tapping Share launches Android's standard share sheet using `ACTION_SEND`, MIME
 type `text/plain`, and `EXTRA_TEXT` containing only
@@ -35,8 +36,9 @@ The app does not claim delivery to the destination app.
 
 ## Acceptance criteria
 
-1. Every recipe detail exposes the two icon-only actions with Spanish spoken
-   labels, long-press tooltips and at least 48 dp touch targets.
+1. Every recipe detail exposes the two icon-only actions on the right of its
+   title header, with Spanish spoken labels, long-press tooltips and at least
+   48 dp touch targets.
 2. Share opens the native chooser, with exactly the encoded GitHub main file URL
    as its text payload and no other shared content.
 3. Nested and accented paths, spaces and reserved URI characters are preserved.
@@ -44,7 +46,7 @@ The app does not claim delivery to the destination app.
 5. Dismissing the chooser preserves detail and notes, without confirmation.
 6. Launch failure shows the specified toast and preserves detail.
 7. Shopping additions retain existing repeat-addition, disabled and persistence
-   behavior. Retry and all other screen actions remain unchanged.
+   behavior. Retry remains unchanged; the cart header follows F3.
 
 ## Validation plan
 
@@ -85,6 +87,15 @@ None. Owner confirmed shared understanding and authorized implementation.
   TalkBack, measured touch targets, font scaling and light/dark rendering remain
   unverified on Android. Host tests and source inspection do not establish those
   runtime outcomes.
+
+## Shared-header revision validation (2026-10-31)
+
+Implemented locally: Share and Add to shopping list now occupy the right side
+of the recipe-title header, outside the scrollable recipe body. Intent payload,
+failure handling, accessibility descriptions, tooltips and enablement remain
+unchanged. All 54 offline tests, including both URL tests, release lint and
+debug/release builds passed. Android interaction/accessibility checks remain
+pending because no device was connected. See [F1 validation](../0001-recipe-browser/spec.md#shared-header-revision-validation-2026-10-31).
 
 ## Delivery history
 

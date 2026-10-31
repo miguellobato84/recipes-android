@@ -11,8 +11,8 @@ The receiving app gets only the recipe's GitHub file URL.
 
 ## Scope and decisions
 
-- Place icon-only Share and Add to shopping list buttons side by side at the
-  start of recipe details. Use a share symbol and a shopping-cart symbol.
+- Place icon-only Share and Add to shopping list buttons side by side on the
+  right of the shared recipe-detail header. Use a share symbol and a shopping-cart symbol.
 - Keep Spanish accessibility labels, long-press tooltips and full-size touch targets.
 - Share the public GitHub file page on `main`, consistent with existing source
   links. Sharing remains available for cached recipes offline and independently
@@ -20,7 +20,7 @@ The receiving app gets only the recipe's GitHub file URL.
 - Cancelling sharing leaves the recipe unchanged, without confirmation feedback.
 - If sharing cannot launch, show “No se puede compartir esta receta.” and remain
   on the recipe. Do not fall back automatically.
-- Keep Retry and actions on other screens unchanged.
+- Keep Retry unchanged; the cart header follows F3.
 
 ## Alternatives and tradeoffs
 
@@ -35,6 +35,7 @@ extra message is outside this feature.
 
 | Date | Decision | Rationale |
 | --- | --- | --- |
+| 2026-10-31 | Move detail actions into the shared header | Owner requested uniform screen headers and action icons on the right; sharing data and behavior stay unchanged. |
 | 2026-10-31 | Accept F5 after grilling | Owner confirmed native sharing of only the GitHub main file link, icon-only detail actions, accessibility, offline behavior and failure handling. |
 
 See [the specification](spec.md).

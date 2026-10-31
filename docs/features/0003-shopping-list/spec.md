@@ -20,7 +20,8 @@ browsing session starts the tree fully collapsed.
 
 ## Add ingredients from a recipe
 
-Add an icon-only shopping-cart button to recipe details, beside Share as specified
+Add an icon-only shopping-cart button to the right of the recipe-detail header,
+beside Share as specified
 by [F5](../0005-recipe-sharing/spec.md). Preserve **Añadir a la lista de la compra**
 as its accessibility label and long-press tooltip, with a full-size touch target.
 One tap contributes all
@@ -65,6 +66,12 @@ Do not multiply quantities, convert units, fuzzy-match, or merge contributions.
 
 ## Clear the list
 
+Use the same header as recipe list/detail, titled **Lista de la compra**. On its
+right, show a filled trash-icon button with spoken label and long-press tooltip
+**Vaciar carrito**, and a touch target of at least 48 dp. This replaces the plain
+**Vaciar** text action. Keep current loading/load-failure enablement and clear
+behavior, including repeated taps while saves are queued.
+
 **Vaciar** removes every ingredient contribution and included-recipe count.
 The resulting screen shows an empty state such as **La lista de la compra está
 vacía**. Clearing an already-empty list leaves it empty. Adding a recipe after
@@ -88,6 +95,9 @@ ingredients. Contributions for the same path remain one group, whose displayed
 title comes from its most recent addition.
 
 ## Acceptance criteria for requested scope
+
+- Shopping uses the shared header with the filled **Vaciar carrito** trash-icon
+  button at the right, retaining spoken label, tooltip and loading/error guards.
 
 - A bar or side menu switches between the recipe list/details and shopping list.
 - All recipe ingredients are added from the recipe detail action.
@@ -122,6 +132,16 @@ titles at different paths, clear-all, and switching destinations. If persistence
 and snapshots are adopted, test offline restart, source changes/deletions, and
 storage failure recovery. Verify navigation, readability, and accessibility on
 Android; record unavailable device checks explicitly.
+
+## Shared-header revision validation (2026-10-31)
+
+Implemented locally: the cart uses the shared header and a filled trash-icon
+button on the right, with “Vaciar carrito” spoken label and tooltip. Its clear
+callback, loading/load-failure guards, queuing and storage behavior are unchanged.
+The recipe's add action now lives in the detail header. All 54 offline tests
+(including ten shopping-list tests), release lint and debug/release builds passed.
+Android interaction/accessibility checks remain pending because no device was
+connected. See [F1 validation](../0001-recipe-browser/spec.md#shared-header-revision-validation-2026-10-31).
 
 ## Delivery history
 

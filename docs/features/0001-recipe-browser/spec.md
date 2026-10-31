@@ -62,6 +62,20 @@ and after failure. Empty collections show the existing Spanish empty state.
 
 There is no search, category filter, or recipe editor.
 
+### Shared screen headers
+
+Recipe list, detail and shopping list use one header component with matching
+padding, typography, minimum height and divider. The title is on the left and
+available action icons on the right, vertically centered. Headers stay above
+the scrolling content. Long titles wrap to two lines with ellipsis; expose the
+full title as an accessibility heading. Do not invent list actions.
+
+The list title is **Recetas**; detail uses the selected recipe's actual title,
+not its category or repository path. Move the source H1 title into this header,
+without repeating it in the detail body. All remaining Markdown stays intact.
+Shopping and Share icons move to the right side of the detail header. The cart
+uses **Lista de la compra** with its clear action on the right.
+
 ### Folder appearance
 
 Every folder row has a 40 dp rounded badge containing a 24 dp category icon.
@@ -137,6 +151,10 @@ There is no refresh button, periodic background refresh, or repository setting.
 The tree pull gesture starts one refresh when no refresh is already
 running. On failure, Spanish status explains that the cached recipes are kept
 and the user can pull down to retry. No last-refresh timestamp is required.
+Show progress only while loading/refreshing and recipe status messages only for
+errors. Successful startup and manual refresh clear previous errors and leave
+no “Recetas actualizadas.” banner. Shopping, personal-note and APK-update
+feedback retain their existing behavior.
 
 ## APK delivery
 
@@ -151,6 +169,12 @@ or the private key. See [scaffolding](../../scaffolding.md) for release automati
 and its delivery status.
 
 ## Acceptance criteria
+
+- List, detail and shopping use the shared header layout, with available action
+  icons aligned right. Detail shows its actual recipe title once, in the header,
+  instead of the category breadcrumb; other Markdown remains intact.
+- Successful startup and pull-to-refresh clear recipe errors and show no success
+  banner. Existing progress and failure feedback remain available.
 
 - Fresh install automatically attempts to download recipes without any button.
 - Cache load precedes the one startup refresh; cached recipes remain visible
@@ -237,8 +261,8 @@ performance results. Documentation setup alone does not validate app behavior.
   lock. Loading the active cache does not wait for a previous session's download
   or delete its staging file. Orphan staging files are cleaned only when no
   refresh owns that directory. During refresh,
-  cached recipes remain browsable. Progress and persistent Spanish error/success
-  status appear above content. After success, keep the selected detail if
+  cached recipes remain browsable. Progress while active and Spanish errors
+  appear below the shared header; success leaves no status banner. After success, keep the selected detail if
   its recipe still exists; return to the tree otherwise. Retain surviving expanded
   folder paths and drop deleted paths.
 - Spanish locale collation at primary strength (case/accent insensitive), with
@@ -291,6 +315,29 @@ Android-filesystem atomic rename behavior, and same-signature APK upgrade cache
 retention have not been exercised on Android. Startup and browsing latency on
 Pixel 10 are unmeasured. Signed F1 release validation is recorded below.
 Host tests and successful builds do not establish those device outcomes.
+
+## Shared-header revision validation (2026-10-31)
+
+Delivery: Implemented locally; Android-device validation pending.
+
+- `./gradlew --no-daemon testDebugUnitTest lintRelease assembleDebug assembleRelease`
+  passed with JDK 17 and the existing Android SDK 36 supplied via `ANDROID_HOME`.
+  All 54 offline tests passed; the opt-in live-source test was skipped. Release
+  lint has zero errors and eight existing warnings. Debug and optimized release
+  APKs built successfully. `git diff --check` passed.
+- Startup tests now assert that success and successful recovery from an unreadable
+  cache leave no message. Existing failure/cancellation/cache tests still pass.
+  Source review confirms pull-to-refresh success clears its message and the UI
+  displays recipe messages only when the error flag is set.
+- All three screens invoke one header component. Source review confirms the
+  actual selected title replaces the category breadcrumb; only detail rendering
+  removes the root source H1, leaving other Markdown and shopping rendering
+  intact. Header action callbacks and enablement are retained. The filled
+  clear-cart button includes Spanish description and tooltip.
+- `adb devices` listed no connected devices. Visual alignment, long titles,
+  font scaling, scroll behavior, TalkBack, tooltip gestures, touch targets and
+  actual cart/share interactions remain untested on Android. No release was
+  published for this revision.
 
 ## Delivery history
 

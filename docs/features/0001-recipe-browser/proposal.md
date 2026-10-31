@@ -26,6 +26,11 @@ a Pixel 10. The recipe repository remains the canonical source; the app is a rea
   light/dark variants and stable neutral fallbacks for unknown categories.
 - Preserve expansion and scroll while opening details, switching to shopping, rotating, or refreshing. Collapsing a branch resets its descendants.
 - Full cache replacement after download and validation succeed.
+- Use the same header layout for list, recipe detail and shopping list: title
+  on the left, available action icons on the right. Detail shows the recipe title
+  instead of its category; display that title once, in the header.
+- Recipe refresh shows progress while active and messages only for errors.
+  Successful startup and pull-to-refresh leave no persistent success banner.
 - Signed APK distribution through GitHub Releases, triggered by pushes to `main`.
   The workflow creates sequential integer tags (`v1`, `v2`, ...).
 
@@ -73,6 +78,7 @@ added folders start collapsed and removed recipes return to the tree.
 
 | Date | Decision | Rationale |
 | --- | --- | --- |
+| 2026-10-31 | Unify headers and remove recipe-refresh success banners | Owner requested matching list/detail/cart headers with actions on the right, recipe titles instead of category breadcrumbs, and recipe status messages only for errors. |
 | 2026-10-31 | Accept category badges after grilling | Owner confirmed automatic semantic colors/icons, independent nested identities, distinct sibling combinations, neutral fallbacks, and light/dark readability. |
 | 2026-10-31 | Accept initial scope | Owner confirmed the design after discussion. |
 | 2026-10-31 | Begin with repository and documentation | App implementation is deferred until after this setup. |
