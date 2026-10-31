@@ -1,5 +1,11 @@
 # Agent instructions
 
+## Git workflow
+
+Work, commit, and push directly on `main` in this repository. Use another branch
+only when the user explicitly requests it. This repository rule overrides the
+GitHub CLI skill's default restriction on committing to `main`.
+
 ## Feature driven development
 
 All feature work must be driven by the feature documents in `docs/features/`.
