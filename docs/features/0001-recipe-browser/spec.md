@@ -102,7 +102,8 @@ performance results. Documentation setup alone does not validate app behavior.
 
 ## Open implementation questions
 
-- Application ID and exact dependency/toolchain versions.
+- Recipe parsing and rendering dependencies; scaffold identity and build
+  toolchain are defined in feature 0002.
 - Snapshot endpoint, limits, timeout, concurrent refresh handling, and durable
   cache replacement mechanism.
 - Handling an empty source, unknown future schema versions, and unsupported

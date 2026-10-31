@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress
+Delivery: Released
 
 ## Scaffold
 
@@ -75,7 +75,22 @@ updates for existing installs.
 
 ## Delivery history
 
+Release validation: [successful workflow](https://github.com/miguellobato84/recipes-android/actions/runs/41197965393)
+and [first published APK, v3](https://github.com/miguellobato84/recipes-android/releases/tag/v3).
+Five version tests, Android lint, optimized signed build, package/version/minimum
+SDK checks, artifact upload, and release publication passed. APK size: 1,296,908
+bytes. The published signing certificate matches the local signing backup.
+Tags `v1`, `v2`, and `v3` advanced on distinct main commits; versionCode and
+versionName in the published APK are both `3`.
+
+Not run: device/emulator installation, launch, and in-place upgrade. No connected
+Pixel or configured Android emulator was available in this session. Startup and
+rendering performance have not been measured. The app contains the greeting
+screen; runtime behavior still needs device verification.
+
 | Date | State | Evidence |
 | --- | --- | --- |
 | 2026-10-31 | In progress | Documentation created before scaffold and workflow implementation. |
 | 2026-10-31 | In progress | Initial `v1` run reserved its tag, then failed because an SDK setup action requested the obsolete `tools` package. Switched to the runner's preinstalled SDK and current pinned Actions. |
+| 2026-10-31 | In progress | `v2` failed AAR compatibility checks; pinned Compose to a verified compatible BOM. Neither failed version published an APK. |
+| 2026-10-31 | Released | Commit `d106417`, tag `v3`: signed APK and checksum published; workflow and artifact verified. |

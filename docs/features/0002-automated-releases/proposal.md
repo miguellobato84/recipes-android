@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress
+Delivery: Released
 
 ## Problem and outcome
 
