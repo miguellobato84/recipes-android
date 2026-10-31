@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress (startup refresh revision; first release: v6)
+Delivery: Released (startup refresh: v8; first release: v6)
 
 Related: [proposal](proposal.md)
 
@@ -237,7 +237,7 @@ Host tests and successful builds do not establish those device outcomes.
 
 ## Startup refresh revision (2026-10-31)
 
-Decision: Accepted. Delivery: Implemented locally; release pending.
+Decision: Accepted. Delivery: Released in v8.
 
 Owner requested removing **Actualizar** and refreshing recipes on startup.
 This revises F1 in place; APK self-updates remain a separate F2 proposal.
@@ -268,3 +268,21 @@ implementation in this change.
   UI, rotation/background lifecycle behavior, Android networking and device
   close/reopen behavior remain untested; host flow/concurrency tests do not
   establish those Android outcomes.
+
+### Published startup refresh revision
+
+- Implementation commit: [`b18785a5214b6a7cbcaf7cd7ca1a723d1c7c8dc9`](https://github.com/miguellobato84/recipes-android/commit/b18785a5214b6a7cbcaf7cd7ca1a723d1c7c8dc9).
+- [`v8`](https://github.com/miguellobato84/recipes-android/releases/tag/v8) points
+  to that exact commit. [Actions run 41207316516](https://github.com/miguellobato84/recipes-android/actions/runs/41207316516)
+  passed release-version tests, lint, the optimized signed build, APK verification,
+  artifact upload and release publication.
+- Downloaded public APK SHA-256 matches its checksum. Signature verification
+  passed; certificate SHA-256 equals the prior published signing identity.
+  Package is `com.miguellobato84.recetas`; versionCode/versionName are `8`,
+  minimum SDK is `36`, and signed APK size is 1,801,779 bytes.
+- The published APK contains the new startup/error text and no obsolete refresh
+  button guidance. Android lifecycle, visual and device checks remain pending.
+
+| Date | State | Evidence |
+| --- | --- | --- |
+| 2026-10-31 | Released | Startup refresh without a manual button, commit `b18785a`, signed release `v8`, successful Actions run `41207316516`; 21 host tests and public APK verification passed. |

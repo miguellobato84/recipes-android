@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress (startup refresh revision; first release: v6)
+Delivery: Released (startup refresh: v8; first release: v6)
 
 ## Problem
 
@@ -64,7 +64,8 @@ All disk, network, parsing, and rendering preparation run off the UI thread.
 | 2026-10-31 | Refresh recipes on startup; remove Actualizar | Owner requested automatic refresh when opening the app. Cached recipes remain available during refresh and after failure. |
 
 F1 is published in signed release [v6](https://github.com/miguellobato84/recipes-android/releases/tag/v6).
-The startup-refresh revision is in progress. Previous host/release checks cover
-the manual-refresh release; new validation is recorded in the specification.
+The startup-refresh revision is published in signed release
+[v8](https://github.com/miguellobato84/recipes-android/releases/tag/v8). New host
+and release checks passed; device validation remains pending.
 
 See [the specification](spec.md) for behavior and acceptance criteria.
