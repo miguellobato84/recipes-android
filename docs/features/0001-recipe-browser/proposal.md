@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: Not started
+Delivery: In progress (implemented locally; not released)
 
 ## Problem
 
@@ -36,6 +36,11 @@ no numeric performance target or benchmark result has been agreed yet.
 Use HTTPS to retrieve one coherent repository snapshot rather than installing a
 Git client on the phone. Keep recipe refresh independent of APK releases.
 
+Use Markwon 4.6.2 core (CommonMark native text rendering), SnakeYAML 2.7
+with safe construction, and Lifecycle ViewModel 2.9.4. Download the public codeload
+ZIP of `main`; validate before atomically renaming the staged file over the cache.
+All disk, network, parsing, and rendering preparation run off the UI thread.
+
 ## Alternatives and tradeoffs
 
 - Bundled recipes were rejected: the first download must be user initiated.
@@ -53,5 +58,9 @@ Git client on the phone. Keep recipe refresh independent of APK releases.
 | 2026-10-31 | Accept initial scope | Owner confirmed the design after discussion. |
 | 2026-10-31 | Begin with repository and documentation | App implementation is deferred until after this setup. |
 | 2026-10-31 | Release on main pushes with integer tags | Replaces tag-triggered releases; tracked as scaffolding infrastructure. |
+| 2026-10-31 | Resolve F1 implementation decisions | Verified source commit `494130cd4dc66f0ef3095040830426e2a839d898`: 27 recipes, text and decimal servings, nested folders, and `desayunos`. Use bounded ZIP snapshots and native Markdown rendering; preserve cache on every pre-commit failure. |
+
+Implementation and host validation are complete locally. Device acceptance and
+release publication remain pending; see the specification for evidence and gaps.
 
 See [the specification](spec.md) for behavior and acceptance criteria.

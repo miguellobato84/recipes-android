@@ -54,4 +54,8 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.11.0")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
+    implementation("org.yaml:snakeyaml:2.7")
+    implementation("io.noties.markwon:core:4.6.2")
+    testImplementation("junit:junit:4.13.2")
 }

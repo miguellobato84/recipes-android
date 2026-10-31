@@ -5,11 +5,11 @@ Keep proposals and specifications in Git alongside implementation.
 
 Scaffolding, app branding, and release infrastructure are documented in
 [scaffolding](scaffolding.md), outside the numbered product features. Feature 0001
-remains unimplemented until scaffolding is complete.
+is now in implementation following the completed scaffolding.
 
 | ID | Feature | Decision | Delivery | Documents |
 | --- | --- | --- | --- | --- |
-| 0001 | Read-only recipe browser | Accepted | Not started | [Proposal](features/0001-recipe-browser/proposal.md), [specification](features/0001-recipe-browser/spec.md) |
+| 0001 | Read-only recipe browser | Accepted | In progress | [Proposal](features/0001-recipe-browser/proposal.md), [specification](features/0001-recipe-browser/spec.md) |
 
 ## Workflow
 

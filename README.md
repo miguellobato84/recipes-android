@@ -3,7 +3,7 @@
 Personal, read-only Android app for browsing recipes from
 [miguellobato84/recipes](https://github.com/miguellobato84/recipes).
 
-## Planned behavior
+## Behavior
 
 - Spanish interface, designed for Pixel 10 and Android 16+.
 - Empty on first launch. Tap **Actualizar** to download recipes from `main`.
@@ -16,8 +16,10 @@ No search, filters, editing, login, or background refresh.
 
 ## Project status
 
-The initial Android scaffold displays **Hola mundo**. Recipe browsing and caching
-are specified but not implemented yet. The app uses Kotlin and Jetpack Compose.
+Feature 0001 is implemented locally with Kotlin and Jetpack Compose: a Spanish
+recipe browser with manual snapshot download, validated atomic cache replacement,
+and offline reading. Release publication is in progress. Device rendering, installation,
+APK upgrade persistence, and Pixel 10 responsiveness still require device checks.
 
 ## Build
 
@@ -26,6 +28,18 @@ Install JDK 17 and Android SDK platform 36, then run:
 ```sh
 ./gradlew assembleDebug
 ```
+
+Run offline acceptance tests and lint with:
+
+```sh
+./gradlew testDebugUnitTest lintRelease
+python3 -m unittest discover -s scripts -p 'test_*.py' -v
+```
+
+For an explicit live source smoke check, run
+`VERIFY_LIVE_RECIPES=1 ./gradlew testDebugUnitTest --rerun-tasks`.
+The live test downloads the public recipe snapshot; normal tests use test-only
+fixtures and do not need network access after Gradle dependencies are installed.
 
 Debug APK: `app/build/outputs/apk/debug/app-debug.apk`.
 Release builds use R8 code optimization and resource shrinking.
