@@ -1,7 +1,8 @@
 # Scaffolding and release setup
 
-Infrastructure reference, outside the numbered product features. Recipe browsing
-remains feature 0001 and will start after scaffolding is complete.
+Infrastructure reference, outside the numbered product features. Current recipe
+browsing, startup app updates, and shopping-list behavior are specified in
+[features 0001–0003](README.md).
 
 ## Android project
 
@@ -10,8 +11,8 @@ API 36 (Android 16). Use Kotlin, Jetpack Compose, Java 17, and the Gradle wrappe
 App name: **Recetas**.
 Use AGP 8.13.2, Gradle 8.13, Kotlin 2.2.21, Activity Compose 1.11.0, and
 Compose BOM 2025.10.01, whose AAR metadata supports this API 36 toolchain.
-Respect system insets, system font sizing, and light/dark mode. There is no
-network access, recipe content, or recipe UI in this scaffold.
+Respect system insets, system font sizing, and light/dark mode. The initial scaffold had no
+network access or recipe UI; the numbered features now extend that scaffold.
 
 ## Launcher icon
 
@@ -92,8 +93,9 @@ versionName in the published APK are both `3`.
 
 Not run: device/emulator installation, launch, and in-place upgrade. No connected
 Pixel or configured Android emulator was available in this session. Startup and
-rendering performance have not been measured. The app contains the greeting
-screen; runtime behavior still needs device verification.
+rendering performance have not been measured. That scaffold release contained only the greeting
+screen. Current feature implementations are described in the documentation index;
+their outstanding device checks are recorded in each specification.
 
 | Date | State | Evidence |
 | --- | --- | --- |

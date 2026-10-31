@@ -244,10 +244,10 @@ This revises F1 in place; APK self-updates remain a separate F2 proposal.
 The original manual-refresh evidence above remains historical and does not
 establish the new startup behavior. New checks and device gaps are recorded below.
 
-Cross-reference conflict: the separate, uncommitted F2 draft still describes an
-explicit **Actualizar** action. This owner-requested F1 revision supersedes those
-recipe-refresh references. F2 draft files remain untouched and F2 has no runtime
-implementation in this change.
+Historical cross-reference conflict (resolved): the earlier F2 draft described an
+explicit **Actualizar** action. This F1 revision superseded those references.
+The current F2 proposal now matches startup recipe refresh, and F2 runtime
+implementation is present in the app; it remains separate from recipe refresh.
 
 ### Startup revision validation
 

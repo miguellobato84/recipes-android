@@ -9,6 +9,9 @@ Personal, read-only Android app for browsing recipes from
 - Load cached recipes first, then refresh from `main` on startup. No refresh button.
 - Browse cached recipes by the repository's folder hierarchy, alphabetically.
 - Read formatted recipes with servings, tags, and external links.
+- Switch between recipes and a persistent shopping list using bottom navigation.
+- Add all ingredients from details; each tap adds another original contribution.
+- See recipe addition counts and ingredients; **Vaciar** clears the shopping list.
 - Failed startup refreshes show an error and preserve the cache; reopen to retry.
 - Check GitHub Releases for signed app updates on startup and install when Android permits unattended updates.
 
@@ -20,8 +23,14 @@ Feature 0001 is released with Kotlin and Jetpack Compose: a Spanish
 recipe browser with startup snapshot download, validated atomic cache replacement,
 and offline reading. Startup refresh is released in [v8](https://github.com/miguellobato84/recipes-android/releases/tag/v8).
 First F1 release: [v6](https://github.com/miguellobato84/recipes-android/releases/tag/v6).
+Feature 0003 is implemented locally: repeatable ingredient snapshots, source-path
+recipe counts, atomic local persistence, and bottom navigation. It has not been
+released by this change. F2 startup updates are released in
+[v11](https://github.com/miguellobato84/recipes-android/releases/tag/v11);
+Android installation checks remain pending.
 Device rendering, installation,
-APK upgrade persistence, and Pixel 10 responsiveness still require device checks.
+APK upgrade persistence, shopping-list touch/back navigation and restoration,
+and Pixel 10 responsiveness still require device checks.
 
 ## Build
 

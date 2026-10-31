@@ -13,6 +13,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +26,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
@@ -41,12 +45,14 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -69,14 +75,89 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
-                Surface(Modifier.fillMaxSize()) { RecipeBrowser() }
+                Surface(Modifier.fillMaxSize()) { RecipeApp() }
             }
         }
     }
 }
 
 @Composable
-private fun RecipeBrowser(model: BrowserViewModel = viewModel()) {
+private fun RecipeApp(
+    browser: BrowserViewModel = viewModel(),
+    shopping: ShoppingListViewModel = viewModel(),
+) {
+    var shoppingSelected by rememberSaveable { mutableStateOf(false) }
+    val destinations = rememberSaveableStateHolder()
+    BackHandler(shoppingSelected) { shoppingSelected = false }
+    Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            if (shoppingSelected) destinations.SaveableStateProvider("shopping") {
+                ShoppingListScreen(shopping.state, shopping::clear)
+            } else destinations.SaveableStateProvider("recipes") {
+                RecipeBrowser(browser, shopping.state, shopping::add)
+            }
+        }
+        NavigationBar(windowInsets = WindowInsets(0, 0, 0, 0)) {
+            NavigationBarItem(selected = !shoppingSelected, onClick = { shoppingSelected = false },
+                icon = { Text("R", Modifier.clearAndSetSemantics { }) }, label = { Text("Recetas") })
+            NavigationBarItem(selected = shoppingSelected, onClick = { shoppingSelected = true },
+                icon = { Text("≡", Modifier.clearAndSetSemantics { }) }, label = { Text("Lista de la compra") })
+        }
+    }
+}
+
+@Composable
+private fun ShoppingStatus(state: ShoppingListState) {
+    if (state.loading || state.saving) LinearProgressIndicator(Modifier.fillMaxWidth())
+    state.message?.let {
+        Text(it, Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+            .semantics { liveRegion = LiveRegionMode.Polite },
+            color = if (state.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
+    }
+}
+
+@Composable
+private fun ShoppingListScreen(state: ShoppingListState, clear: () -> Unit) {
+    val groups = remember(state.additions) { shoppingRecipeGroups(state.additions) }
+    Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Lista de la compra", Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall)
+            TextButton(onClick = clear, enabled = !state.loading && !state.loadFailed) { Text("Vaciar") }
+        }
+        ShoppingStatus(state)
+        HorizontalDivider()
+        when {
+            state.loading -> Text("Cargando lista de la compra…", Modifier.padding(20.dp))
+            state.loadFailed -> Unit
+            groups.isEmpty() -> Text("La lista de la compra está vacía.", Modifier.padding(20.dp))
+            else -> LazyColumn(Modifier.fillMaxSize()) {
+                item { Text("Recetas incluidas e ingredientes", Modifier.padding(20.dp),
+                    style = MaterialTheme.typography.titleMedium) }
+                groups.forEach { group ->
+                    item(key = group.sourcePath) {
+                        Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("${group.count}x ${group.title}", style = MaterialTheme.typography.titleLarge)
+                            // The path also distinguishes recipes whose titles happen to match.
+                            Text(group.sourcePath, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                    items(group.additions.size, key = { index -> "${group.sourcePath}#$index" }) { index ->
+                        val addition = group.additions[index]
+                        Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                            Text("Adición ${index + 1}: ${addition.title}", style = MaterialTheme.typography.titleSmall)
+                            MarkdownContent(addition.sourcePath, addition.ingredientsMarkdown)
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState, add: (Recipe) -> Unit) {
     val state = model.state
     val updateStatus by AppUpdateManager.status.collectAsState()
     var location by rememberSaveable { mutableStateOf("") }
@@ -86,7 +167,7 @@ private fun RecipeBrowser(model: BrowserViewModel = viewModel()) {
     val folder = if (recipe == null) visibleLocation else recipe.path.substringBeforeLast('/')
     fun back() { location = visibleLocation.substringBeforeLast('/', "") }
     BackHandler(visibleLocation.isNotEmpty()) { back() }
-    Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+    Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween) {
             if (visibleLocation.isNotEmpty()) TextButton(onClick = { back() }, modifier = Modifier.weight(1f)) { Text("Atrás") }
@@ -107,6 +188,7 @@ private fun RecipeBrowser(model: BrowserViewModel = viewModel()) {
                 .semantics { liveRegion = LiveRegionMode.Polite },
                 color = if (updateStatus.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
         }
+        ShoppingStatus(shopping)
         if (folder.isNotEmpty()) {
             Text(folder.replace("/", " / "), Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                 style = MaterialTheme.typography.titleMedium)
@@ -115,7 +197,7 @@ private fun RecipeBrowser(model: BrowserViewModel = viewModel()) {
         when {
             state.loading -> Unit
             state.recipes.isEmpty() -> Text("No hay recetas disponibles.", Modifier.padding(24.dp))
-            recipe != null -> key(recipe) { RecipeDetail(recipe) }
+            recipe != null -> key(recipe) { RecipeDetail(recipe, !shopping.loading && !shopping.loadFailed) { add(recipe) } }
             else -> key(visibleLocation) {
                 LazyColumn(Modifier.fillMaxSize()) {
                     items(folderEntries(state.recipes, visibleLocation), key = { it.path }) { entry ->
@@ -133,12 +215,23 @@ private fun RecipeBrowser(model: BrowserViewModel = viewModel()) {
 }
 
 @Composable
-private fun RecipeDetail(recipe: Recipe) {
+private fun RecipeDetail(recipe: Recipe, canAdd: Boolean, add: () -> Unit) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        TextButton(onClick = add, enabled = canAdd) { Text("Añadir a la lista de la compra") }
+        Text("Raciones: ${recipe.servings}", style = MaterialTheme.typography.titleMedium)
+        if (recipe.tags.isNotEmpty()) Text("Etiquetas: ${recipe.tags.joinToString(", ")}", style = MaterialTheme.typography.bodyMedium)
+        MarkdownContent(recipe.path, recipe.markdown)
+    }
+}
+
+@Composable
+private fun MarkdownContent(sourcePath: String, markdown: String) {
     val context = LocalContext.current
     val color = MaterialTheme.colorScheme.onSurface.toArgb()
     val density = LocalDensity.current
     val textSizePx = with(density) { MaterialTheme.typography.bodyLarge.fontSize.toPx() }
-    val markwon = remember(recipe.path) {
+    val markwon = remember(sourcePath) {
         Markwon.builder(context).usePlugin(object : AbstractMarkwonPlugin() {
             override fun beforeRender(node: Node) {
                 fun replaceImages(parent: Node) {
@@ -163,7 +256,7 @@ private fun RecipeDetail(recipe: Recipe) {
             }
             override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
                 builder.linkResolver { _, link ->
-                    val uri = externalLink(recipe.path, link)
+                    val uri = externalLink(sourcePath, link)
                     try {
                         if (uri == null) throw ActivityNotFoundException()
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString())))
@@ -174,14 +267,11 @@ private fun RecipeDetail(recipe: Recipe) {
             }
         }).build()
     }
-    val rendered by produceState<CharSequence?>(null, recipe.markdown, markwon) {
-        value = withContext(Dispatchers.Default) { markwon.toMarkdown(recipe.markdown) }
+    val rendered by produceState<CharSequence?>(null, markdown, markwon) {
+        value = withContext(Dispatchers.Default) { markwon.toMarkdown(markdown) }
     }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Raciones: ${recipe.servings}", style = MaterialTheme.typography.titleMedium)
-        if (recipe.tags.isNotEmpty()) Text("Etiquetas: ${recipe.tags.joinToString(", ")}", style = MaterialTheme.typography.bodyMedium)
-        if (rendered == null) Text("Preparando receta…")
+    Column(Modifier.fillMaxWidth()) {
+        if (rendered == null) Text("Preparando texto…")
         AndroidView(
             factory = { TextView(it).apply { movementMethod = LinkMovementMethod.getInstance() } },
             update = { view ->

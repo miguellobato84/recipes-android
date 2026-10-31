@@ -11,6 +11,7 @@ was first released in [v6](https://github.com/miguellobato84/recipes-android/rel
 | --- | --- | --- | --- | --- |
 | 0001 | Read-only recipe browser | Accepted | Released | [Proposal](features/0001-recipe-browser/proposal.md), [specification](features/0001-recipe-browser/spec.md) |
 | 0002 | Automatic app updates on startup | Accepted | Released (v11) | [Proposal](features/0002-startup-app-updates/proposal.md), [specification](features/0002-startup-app-updates/spec.md) |
+| 0003 | Shopping list | Accepted | In progress (implemented locally) | [Proposal](features/0003-shopping-list/proposal.md), [specification](features/0003-shopping-list/spec.md) |
 
 ## Workflow
 
@@ -30,7 +31,8 @@ was first released in [v6](https://github.com/miguellobato84/recipes-android/rel
    evidence to delivery history and update this index.
 
 Decision statuses: Proposed, Accepted, Rejected, Superseded.
-Delivery statuses: Not started, In progress, Released.
+Delivery statuses: Not started, In progress (including locally implemented work
+with pending validation), Released.
 
 The current documents describe the latest specified behavior. Git preserves their
 previous versions. The dated history records product decisions and release

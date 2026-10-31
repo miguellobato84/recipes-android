@@ -144,3 +144,15 @@ Resolved implementation choices:
 | 2026-10-31 | Implemented locally | Release parsing, numeric selection, SHA-256 parsing, APK identity/version/SDK/signing checks, PackageInstaller submission, and nonmodal pending statuses added. Four release-catalog JUnit tests pass in a direct Kotlin/JUnit run. Local Gradle tests, lint, and release build were blocked because Android SDK Platform 36 and Build Tools 35 required license acceptance. Device checks were unavailable because `adb` was not installed. |
 | 2026-10-31 | v10 reserved, not released | Workflow run [41211109315](https://github.com/miguellobato84/recipes-android/actions/runs/41211109315) created tag `v10`, then failed Kotlin compilation because `ApplicationInfo.maxSdkVersion` is unavailable. The tag remains on its original commit; no v10 release or APK was published. |
 | 2026-10-31 | Released in v11 | Commit [`3365b5f`](https://github.com/miguellobato84/recipes-android/commit/3365b5f562a9c25d40bfe9fc8f13c16e66473a6c), tag [v11](https://github.com/miguellobato84/recipes-android/releases/tag/v11), and successful [workflow run 41211316266](https://github.com/miguellobato84/recipes-android/actions/runs/41211316266). CI version tests, lint, signed release build, APK package/version/minimum-SDK checks, signature verification, artifact upload, and release publication passed. Published APK SHA-256 matches its checksum asset; signer SHA-256 `c6cfcbe03fef93ffa42c759058a804ef8009ff68e9afbaf9e39f06ca3c0d1ef9` matches v9. Device/Pixel 10 unattended-install checks remain untested. |
+
+### Subsequent local build verification (2026-10-31)
+
+The SDK blocker in the earlier implementation record was resolved by using the
+existing SDK from the F1 workspace (Platform 36 / Build Tools 35.0.0). At fetched
+`origin/main` base `3365b5f`, with F3 additions, all four release-catalog tests,
+the full offline JVM suite, `lintRelease`, `assembleDebug`, and optimized
+`assembleRelease` passed. No updater or signing code was changed by F3. The
+available `adb` reports no connected devices and no emulator is configured;
+PackageInstaller callbacks, permission handling, unattended installation, signer
+validation on-device, and same-signature upgrade persistence still require Android
+validation. Earlier SDK/adb limitations above describe that earlier run only.
