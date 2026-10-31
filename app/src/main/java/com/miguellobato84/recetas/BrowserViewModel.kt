@@ -20,6 +20,8 @@ data class BrowserState(
 )
 
 class BrowserViewModel(application: Application) : AndroidViewModel(application) {
+    // Stable across rotation; a fresh ViewModel must not restore a previous session's tree.
+    val sessionId = java.util.UUID.randomUUID().toString()
     private val repository = RecipeRepository(File(application.filesDir, "recipe-cache"))
     var state by mutableStateOf(BrowserState())
         private set

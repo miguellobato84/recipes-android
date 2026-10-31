@@ -9,13 +9,14 @@ Related: [proposal](proposal.md).
 ## Navigation
 
 Provide a bottom navigation bar with **Recetas** and **Lista de la compra**.
-The recipe destination includes F1's folder listing and recipe-detail screens.
+The recipe destination includes F1's expandable recipe tree and recipe-detail screens.
 The shopping-list destination shows ingredient contributions, included recipes,
 their counts, and **Vaciar**. Switching destinations must not clear the list.
 
-Keep the current recipe folder or detail visible when returning from shopping
-list. Android back from shopping list returns to **Recetas**; standard F1 back
-navigation continues within recipe folders/details.
+Keep the recipe tree expansion, tree scroll, and selected detail when returning
+from shopping. Android Back from shopping returns to **Recetas**. F1 Back returns
+from details to the preserved tree; Back from the tree leaves the app. A new
+browsing session starts the tree fully collapsed.
 
 ## Add ingredients from a recipe
 
@@ -91,7 +92,8 @@ title comes from its most recent addition.
   displays one included-recipe summary with count **2x**.
 - Adding another recipe preserves earlier contributions and shows both recipes.
 - Distinct recipe paths with identical titles remain distinct contributions.
-- Switching modes retains ingredient contributions and recipe counts.
+- Switching modes retains ingredient contributions, recipe counts, tree expansion,
+  tree scroll, and selected detail within the current browsing session.
 - **Vaciar** empties both ingredients and recipe summaries without changing recipes.
 - Adding after **Vaciar** starts again at **1x**.
 
@@ -100,7 +102,7 @@ title comes from its most recent addition.
 Resolved implementation choices: recipe groups use first-addition order;
 contributions append within their group. A path rename creates a distinct group.
 Save and restore each destination’s Compose state while switching so
-folder/detail scroll position survives. Serialize every accepted add/clear; a tap during an ongoing save queues
+tree expansion, tree scroll, and detail scroll position survive within a session. Serialize every accepted add/clear; a tap during an ongoing save queues
 rather than disappearing. Disable mutations only until initial load completes or
 if stored data cannot be read. A load failure preserves the unreadable file and
 shows an error; reopening retries. An empty ingredient section cannot contribute
@@ -176,3 +178,15 @@ outcomes. No release or Pixel performance claim is made.
 | 2026-10-31 | Implemented locally, not released | Ten F3 acceptance tests plus existing offline suites, five version tests, debug/release builds and lint passed. Navigation source reviewed; Android interaction/restoration/accessibility and APK-upgrade checks remain pending. |
 
 | 2026-10-31 | Feature-branch push authorized | Owner requested pushing the verified local implementation. Release and Android-device checks remain separate. |
+
+### Tree navigation alignment (2026-10-31)
+
+F1 now specifies inline folder expansion and session-scoped tree restoration.
+The recipe destination now uses the browser session ID as part of its saved-state
+key and retains tree scroll state while details are open. Destination switching
+retains expansion and selected detail in that session; a new session cannot
+reopen an old tree. All 47 offline tests (including ten shopping tests and five
+new F1 tree tests), debug/release builds and release lint passed. No connected
+Android device was available; actual destination/back/scroll/rotation restoration
+and accessibility remain untested. Historical folder-navigation evidence above
+does not establish revised tree behavior.

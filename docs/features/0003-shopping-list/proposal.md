@@ -23,7 +23,7 @@ see which recipes contributed to the list, including repeated additions.
 ## Decisions
 
 - Use a bottom navigation bar with **Recetas** and **Lista de la compra**.
-- Preserve the recipe folder/detail position while switching destinations and
+- Preserve the recipe tree expansion, scroll, and selected detail while switching destinations and
   use Android back to return from shopping list to recipes.
 - Persist shopping-list state in private app storage across restarts and ordinary
   APK updates. Store each addition as a snapshot of source path, displayed title,
@@ -56,5 +56,6 @@ purchase checkboxes, sharing, and cloud synchronization are outside this scope.
 | --- | --- | --- |
 | 2026-10-31 | Record F3 requirements | Owner requested shopping-list navigation, clear-all, repeatable ingredient additions, and included-recipe counts. |
 | 2026-10-31 | Accept implementation decisions | Bottom navigation preserves recipe position; atomic private-file snapshots retain each source ingredient section and repeated addition across refresh and restarts. |
+| 2026-10-31 | Align with F1 tree navigation | Returning from shopping preserves expanded branches, tree scroll, and selected detail within the same browsing session. |
 
 See [the specification](spec.md) for behavior, examples, and acceptance criteria.

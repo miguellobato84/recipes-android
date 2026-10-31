@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress (pull-to-refresh revision implemented locally; startup refresh: v8; first release: v6)
+Delivery: In progress (tree navigation implemented locally; Android-device validation pending; startup refresh: v8; first release: v6)
 
 ## Problem
 
@@ -19,9 +19,10 @@ a Pixel 10. The recipe repository remains the canonical source; the app is a rea
 - Spanish interface, Android 16+, app name **Recetas**.
 - Automatic startup download from public `miguellobato84/recipes`, branch `main`.
 - No bundled recipes; load the persistent cache first, then refresh on startup.
-- Refresh automatically on startup and by pulling down on a folder list; retain
+- Refresh automatically on startup and by pulling down on the recipe tree; retain
   the cache and show a Spanish error on failure.
-- Alphabetical folder navigation and complete recipe details.
+- One expandable tree containing the full recipe hierarchy, initially collapsed in each new browsing session; separate complete recipe details.
+- Preserve expansion and scroll while opening details, switching to shopping, rotating, or refreshing. Collapsing a branch resets its descendants.
 - Full cache replacement after download and validation succeed.
 - Signed APK distribution through GitHub Releases, triggered by pushes to `main`.
   The workflow creates sequential integer tags (`v1`, `v2`, ...).
@@ -47,13 +48,24 @@ All disk, network, parsing, and rendering preparation run off the UI thread.
 
 - Bundled recipes remain excluded: the first startup downloads the public source.
 - Manual refresh was replaced by startup refresh at the owner's request; a
-  pull-to-refresh gesture is available on folder lists. No refresh button,
+  pull-to-refresh gesture is available on the recipe tree. No refresh button,
   polling, or refresh on background resume is provided.
 - Keeping deleted recipes was rejected: successful refresh mirrors the source.
 - App code in the recipe repository was rejected in favor of a separate repository.
 - Android 8 support was replaced by Android 16+ support for the owner's Pixel 10.
 - Full snapshot validation favors a consistent cache; one invalid recipe prevents
   the refresh from replacing any existing recipes.
+
+## Tree navigation decisions
+
+Tap an entire folder row to toggle its branch, with an arrow and Spanish
+accessibility state. Multiple branches may remain open. Each level lists folders
+before recipes using existing Spanish alphabetical ordering. Recipe titles open
+existing details, including shopping actions and personal notes. No global
+expand/collapse controls. Android Back returns from details to the same tree
+position, and from the tree leaves the app. New sessions reset the tree; rotation
+and destination changes preserve it. Refresh keeps surviving expansion; newly
+added folders start collapsed and removed recipes return to the tree.
 
 ## Decision history
 
@@ -65,6 +77,7 @@ All disk, network, parsing, and rendering preparation run off the UI thread.
 | 2026-10-31 | Resolve F1 implementation decisions | Verified source commit `494130cd4dc66f0ef3095040830426e2a839d898`: 27 recipes, text and decimal servings, nested folders, and `desayunos`. Use bounded ZIP snapshots and native Markdown rendering; preserve cache on every pre-commit failure. |
 | 2026-10-31 | Refresh recipes on startup; remove Actualizar | Owner requested automatic refresh when opening the app. Cached recipes remain available during refresh and after failure. |
 | 2026-10-31 | Add pull-to-refresh on folder lists; remove Atrás button | Owner requested a gesture for refreshing and relies on Android system back navigation. |
+| 2026-10-31 | Accept expandable recipe tree | Owner confirmed inline expansion, new-session collapse, descendant reset, preserved return position, and refresh behavior after grilling. |
 
 F1 is published in signed release [v6](https://github.com/miguellobato84/recipes-android/releases/tag/v6).
 The startup-refresh revision is published in signed release

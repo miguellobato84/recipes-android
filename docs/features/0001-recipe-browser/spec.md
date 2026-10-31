@@ -2,7 +2,7 @@
 
 Decision: Accepted
 
-Delivery: In progress (pull-to-refresh revision implemented locally; startup refresh: v8; first release: v6)
+Delivery: In progress (tree navigation implemented locally; Android-device validation pending; startup refresh: v8; first release: v6)
 
 Related: [proposal](proposal.md)
 
@@ -33,15 +33,32 @@ Uninstalling the app or clearing its data is outside that persistence guarantee.
 
 ## Navigation
 
-Reflect recipe folders, including `desayunos` and nested folders such as
-`principales/carne`. List folders before recipes, with each group alphabetically
-ordered. Use recipe titles as recipe labels. Android system back navigation
-(button or gesture) returns to the containing folder or previous screen; do not
-show an in-app **Atrás** button.
+Show the complete repository hierarchy in one scrollable, expandable tree on the
+main **Recetas** screen. Preserve arbitrary nested folders, including `desayunos`
+and `principales/carne`. Initially show top-level folders only. All folders start collapsed whenever
+a new activity-scoped browser ViewModel starts a browsing session, including
+process recreation. Rotation reuses the session and preserves navigation.
 
-Pulling down from the top of a folder list starts a recipe refresh. The gesture
-is available on folder lists only, not on recipe details or the shopping list.
-The cache remains browsable while refreshing and after a refresh failure.
+At each level, list folders before recipes, each alphabetically ordered using
+Spanish collation and path tie-breaking. Use recipe titles as recipe labels.
+Indent rows by nesting level. The entire folder row toggles expansion; show a
+state arrow and expose Spanish expanded/collapsed state to accessibility.
+Multiple branches may stay open. Closing a folder clears expansion for all its
+descendants, so reopening shows immediate children with nested folders collapsed.
+No global expand-all or collapse-all controls.
+
+Tapping a recipe opens its existing separate detail screen, including shopping
+actions and personal notes. Android Back returns directly to the tree with its
+expansion and scroll position preserved. Back from the tree leaves the app;
+it does not collapse branches. No in-app **Atrás** button. Switching to/from the
+shopping list preserves tree expansion, tree scroll, and the selected detail.
+
+Pulling down from the top of the tree starts a recipe refresh. The gesture is
+unavailable on recipe details or the shopping list. Keep surviving folders
+expanded and remove deleted folder paths from expansion state. Newly added
+folders start collapsed. Preserve the selected recipe if its path still exists;
+otherwise return to the tree. Cached content remains browsable during refresh
+and after failure. Empty collections show the existing Spanish empty state.
 
 There is no search, category filter, or recipe editor.
 
@@ -79,7 +96,7 @@ does not change source recipes or enforce ingredient measurement conventions.
 
 Browsing must not read a partially downloaded or partially replaced snapshot.
 There is no refresh button, periodic background refresh, or repository setting.
-The folder-list pull gesture starts one refresh when no refresh is already
+The tree pull gesture starts one refresh when no refresh is already
 running. On failure, Spanish status explains that the cached recipes are kept
 and the user can pull down to retry. No last-refresh timestamp is required.
 
@@ -102,11 +119,16 @@ and its delivery status.
   during a pending refresh and after an offline/error result.
 - Rotation/recomposition/background resume of the existing browsing session
   does not trigger another attempt. A new session retries once.
-- Pulling down at the top of a folder list starts a refresh; it is unavailable
+- Pulling down at the top of the recipe tree starts a refresh; it is unavailable
   on recipe details and the shopping list. Repeated gestures during a refresh
   do not start concurrent refreshes.
-- Android system back returns to the parent folder or previous screen without
-  an in-app **Atrás** button.
+- Android Back returns from details to the tree at its previous expansion and
+  scroll position; Back from the tree leaves the app without collapsing folders.
+- A new browsing session starts fully collapsed; rotation and destination changes
+  preserve expansion. Multiple branches can open independently. Closing a branch
+  resets all descendants; reopening does not restore nested expansion.
+- Refresh preserves surviving expanded folders, starts new folders collapsed, and
+  removes deleted paths. A deleted selected recipe returns to the tree.
 - A successful startup refresh enables category browsing and recipe details.
 - Folder hierarchy includes nested categories and `desayunos`; ordering follows
   the navigation rules.
@@ -165,19 +187,21 @@ performance results. Documentation setup alone does not validate app behavior.
   or the new complete ZIP. APK updates retain private files.
 - Lifecycle ViewModel 2.9.4 owns work across rotation. Load/cache work runs on IO;
   Markdown spans prepare off the UI thread. Its initialization runs cache load
-  then one refresh; there is no public UI refresh action. Existing ViewModel
+  then one refresh; the tree pull gesture can request another refresh. Existing ViewModel
   retention prevents rotation/recomposition from starting duplicate work.
   Concurrent refresh calls across sessions serialize through a per-cache-directory
   lock. Loading the active cache does not wait for a previous session's download
   or delete its staging file. Orphan staging files are cleaned only when no
   refresh owns that directory. During refresh,
   cached recipes remain browsable. Progress and persistent Spanish error/success
-  status appear above content. After success, keep the current folder/detail if
-  it still exists; return to its nearest surviving parent otherwise.
+  status appear above content. After success, keep the selected detail if
+  its recipe still exists; return to the tree otherwise. Retain surviving expanded
+  folder paths and drop deleted paths.
 - Spanish locale collation at primary strength (case/accent insensitive), with
   path as deterministic tie-breaker; folders precede recipe titles. System back
-  and **Atrás** go to the parent. Keep folder/detail position across rotation and
-  saved instance restoration. Honor system font scaling, insets and light/dark
+  returns from details to the tree, and leaves the app from the tree. Keep tree
+  expansion, scroll, and detail selection across rotation within the same session;
+  saved state from an earlier session must not reopen branches or details. Honor system font scaling, insets and light/dark
   theme. Preserve existing launcher artwork and release/signing setup.
 
 ## Original manual-refresh release validation (2026-10-31)
@@ -315,3 +339,33 @@ workspace; unit, lint, and device validation remain outstanding.
 | Date | State | Evidence |
 | --- | --- | --- |
 | 2026-10-31 | In progress | Pull-to-refresh and navigation changes implemented locally; SDK unavailable for build verification. |
+
+### Tree navigation revision (2026-10-31)
+
+Owner confirmed the revised Navigation section and acceptance criteria after
+grilling. F1 replaces folder drill-down with the tree; F3 retains destination
+state. Implemented locally; not published. Validation:
+
+- `./gradlew --no-daemon testDebugUnitTest lintRelease assembleDebug assembleRelease`
+  passed using JDK 17 and the existing Android SDK platform 36. All 47 offline
+  tests passed; the opt-in live-source test was skipped. No network importer
+  behavior changed, so the pinned 27-recipe fixture supplies navigation evidence.
+- Five new tree tests verify collapsed defaults and empty collections; independent
+  inline expansion with Spanish folder-first ordering and path tie-breaking;
+  descendant reset without collapsing sibling/prefix-matching folders; refresh
+  retention/removal with new folders collapsed; and exactly one correctly titled
+  and indented leaf for every recipe in the pinned fixture.
+- Source review confirms tree scroll state stays allocated while details open,
+  the recipe destination saves expansion/selection/scroll while shopping is shown,
+  and its saved-state key includes the browser ViewModel session ID. Rotation
+  reuses that ID; a new ViewModel cannot restore a previous session's tree.
+- `git diff --check` passed. Release lint reported zero errors and eight warnings
+  (dependency updates, backup/icon configuration, and existing URI style guidance).
+- `adb devices` reported no connected devices. Actual taps, Back, scroll return,
+  rotation/process recreation, TalkBack, font scaling and appearance have not
+  been exercised on Android. Host tests/builds and source review do not establish
+  those device outcomes. No release publication was requested.
+
+| Date | State | Evidence |
+| --- | --- | --- |
+| 2026-10-31 | Implemented locally, not released | 47 offline tests, debug/release builds and release lint passed. Tree/session navigation source reviewed; Android interaction/restoration/accessibility checks remain pending. |

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.NavigationBar
@@ -50,6 +51,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -59,6 +61,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -97,7 +101,7 @@ private fun RecipeApp(
         Box(Modifier.weight(1f).fillMaxWidth()) {
             if (shoppingSelected) destinations.SaveableStateProvider("shopping") {
                 ShoppingListScreen(shopping.state, shopping::clear)
-            } else destinations.SaveableStateProvider("recipes") {
+            } else destinations.SaveableStateProvider("recipes/${browser.sessionId}") {
                 RecipeBrowser(browser, shopping.state, shopping::add, notes)
             }
         }
@@ -165,15 +169,24 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
     add: (Recipe) -> Unit, notes: RecipeNotesViewModel) {
     val state = model.state
     val updateStatus by AppUpdateManager.status.collectAsState()
-    var location by rememberSaveable { mutableStateOf("") }
-    val visibleLocation = if (state.loading) location else survivingLocation(state.recipes, location)
-    LaunchedEffect(visibleLocation) { if (!state.loading) location = visibleLocation }
-    val recipe = state.recipes.firstOrNull { it.path == visibleLocation }
-    val folder = if (recipe == null) visibleLocation else recipe.path.substringBeforeLast('/')
-    fun back() { location = visibleLocation.substringBeforeLast('/', "") }
-    BackHandler(visibleLocation.isNotEmpty()) { back() }
+    var selectedPath by rememberSaveable { mutableStateOf("") }
+    var expandedFolders by rememberSaveable(
+        stateSaver = listSaver<Set<String>, String>(save = { it.toList() }, restore = { it.toSet() }),
+    ) { mutableStateOf(emptySet<String>()) }
+    val treeScroll = rememberLazyListState()
+    val tree = remember(state.recipes) { RecipeTree(state.recipes) }
+    val expanded = remember(tree, expandedFolders) { expandedFolders.intersect(tree.folders) }
+    val rows = remember(tree, expanded) { tree.visibleEntries(expanded) }
+    val recipe = state.recipes.firstOrNull { it.path == selectedPath }
+    LaunchedEffect(tree, state.loading) {
+        if (!state.loading) {
+            expandedFolders = expanded
+            if (recipe == null) selectedPath = ""
+        }
+    }
+    BackHandler(recipe != null) { selectedPath = "" }
     Column(Modifier.fillMaxSize()) {
-        if (visibleLocation.isEmpty()) Text("Recetas", style = MaterialTheme.typography.headlineSmall,
+        if (recipe == null) Text("Recetas", style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.fillMaxWidth().padding(12.dp))
         if (state.loading || state.refreshing) {
             LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -191,8 +204,8 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
                 color = if (updateStatus.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
         }
         ShoppingStatus(shopping)
-        if (folder.isNotEmpty()) {
-            Text(folder.replace("/", " / "), Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+        if (recipe != null) {
+            Text(recipe.path.substringBeforeLast('/', "").replace("/", " / "), Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                 style = MaterialTheme.typography.titleMedium)
         }
         HorizontalDivider()
@@ -203,16 +216,31 @@ private fun RecipeBrowser(model: BrowserViewModel, shopping: ShoppingListState,
                 RecipeDetail(recipe, !shopping.loading && !shopping.loadFailed,
                     { add(recipe) }, notes.state, { notes.edit(recipe.path, it) }, notes::retry)
             }
-            else -> key(visibleLocation) {
+            else -> {
                 PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = model::refresh,
                     modifier = Modifier.fillMaxSize()) {
-                    LazyColumn(Modifier.fillMaxSize()) {
-                        items(folderEntries(state.recipes, visibleLocation), key = { it.path }) { entry ->
+                    LazyColumn(Modifier.fillMaxSize(), state = treeScroll) {
+                        items(rows, key = { it.entry.path }) { row ->
+                            val entry = row.entry
+                            val isExpanded = entry.path in expanded
                             ListItem(
                                 headlineContent = { Text(entry.label) },
                                 supportingContent = if (entry.isFolder) ({ Text("Carpeta") }) else null,
-                                trailingContent = { Text("›") },
-                                modifier = Modifier.clickable { location = entry.path },
+                                trailingContent = { Text(if (entry.isFolder && isExpanded) "▾" else "›",
+                                    Modifier.clearAndSetSemantics { }) },
+                                modifier = Modifier.padding(start = (row.depth * 16).dp)
+                                    .semantics {
+                                        if (entry.isFolder) stateDescription = if (isExpanded) "Expandida" else "Contraída"
+                                    }
+                                    .clickable(
+                                        role = Role.Button,
+                                        onClickLabel = if (entry.isFolder) {
+                                            if (isExpanded) "Contraer carpeta" else "Expandir carpeta"
+                                        } else "Abrir receta",
+                                    ) {
+                                        if (entry.isFolder) expandedFolders = tree.toggle(expanded, entry.path)
+                                        else selectedPath = entry.path
+                                    },
                             )
                         }
                     }
