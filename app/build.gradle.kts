@@ -58,4 +58,5 @@ dependencies {
     implementation("org.yaml:snakeyaml:2.7")
     implementation("io.noties.markwon:core:4.6.2")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
 }

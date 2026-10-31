@@ -34,6 +34,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -64,6 +65,7 @@ import org.commonmark.node.Text as MarkdownText
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppUpdateManager.start(applicationContext)
         enableEdgeToEdge()
         setContent {
             MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
@@ -76,6 +78,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun RecipeBrowser(model: BrowserViewModel = viewModel()) {
     val state = model.state
+    val updateStatus by AppUpdateManager.status.collectAsState()
     var location by rememberSaveable { mutableStateOf("") }
     val visibleLocation = if (state.loading) location else survivingLocation(state.recipes, location)
     LaunchedEffect(visibleLocation) { if (!state.loading) location = visibleLocation }
@@ -98,6 +101,11 @@ private fun RecipeBrowser(model: BrowserViewModel = viewModel()) {
             Text(it, Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                 .semantics { liveRegion = LiveRegionMode.Polite },
                 color = if (state.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
+        }
+        updateStatus.message?.let {
+            Text(it, Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                .semantics { liveRegion = LiveRegionMode.Polite },
+                color = if (updateStatus.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
         }
         if (folder.isNotEmpty()) {
             Text(folder.replace("/", " / "), Modifier.padding(horizontal = 20.dp, vertical = 8.dp),

@@ -10,7 +10,7 @@ Personal, read-only Android app for browsing recipes from
 - Browse cached recipes by the repository's folder hierarchy, alphabetically.
 - Read formatted recipes with servings, tags, and external links.
 - Failed startup refreshes show an error and preserve the cache; reopen to retry.
-- Install signed APKs from GitHub Releases.
+- Check GitHub Releases for signed app updates on startup and install when Android permits unattended updates.
 
 No search, filters, editing, login, or periodic background refresh.
 
@@ -51,7 +51,10 @@ Release builds use R8 code optimization and resource shrinking.
 Each push to `main` creates the next integer tag (`v1`, `v2`, ...), builds a signed
 APK, uploads a workflow artifact, and publishes a
 [GitHub Release](https://github.com/miguellobato84/recipes-android/releases).
-Download `recetas-vX.apk` from its release and install it manually on Android 16+.
+Download `recetas-vX.apk` from its release and install it manually on Android 16+
+for the first install. Startup update installation also requires enabling “install
+unknown apps” for Recetas in Android Settings. The app never opens settings or
+installation confirmation UI; Android can still require user action for an update.
 Android versionCode and versionName both use X. Retrying a workflow reuses its tag.
 
 CI requires `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
