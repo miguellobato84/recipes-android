@@ -1,6 +1,7 @@
 # 0002 Hello world and automated APK releases proposal
 
-Decision: Accepted  
+Decision: Accepted
+
 Delivery: In progress
 
 ## Problem and outcome

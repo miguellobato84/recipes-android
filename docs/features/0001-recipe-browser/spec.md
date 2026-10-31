@@ -1,7 +1,9 @@
 # 0001 Read-only recipe browser specification
 
-Decision: Accepted  
-Delivery: Not started  
+Decision: Accepted
+
+Delivery: Not started
+
 Related: [proposal](proposal.md)
 
 ## Platform and identity

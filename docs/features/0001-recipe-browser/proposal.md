@@ -1,6 +1,7 @@
 # 0001 Read-only recipe browser proposal
 
-Decision: Accepted  
+Decision: Accepted
+
 Delivery: Not started
 
 ## Problem

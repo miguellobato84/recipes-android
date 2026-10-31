@@ -1,6 +1,7 @@
 # 0002 Hello world and automated APK releases specification
 
-Decision: Accepted  
+Decision: Accepted
+
 Delivery: In progress
 
 ## Scaffold
@@ -43,7 +44,9 @@ rerun the failed workflow to finish that version.
 On retries, reuse an existing release and replace its same-named assets. Publish
 only after build and signature verification succeed. Upload failures fail the run.
 The workflow token needs repository contents write permission for tags/releases.
-Pin third-party Actions to verified commit hashes.
+Pin third-party Actions to verified commit hashes. Use the Ubuntu 24.04 runner's
+preinstalled Android command-line tools; install platform 36 and build tools
+35.0.0 without requesting the obsolete SDK `tools` package.
 
 ## Signing and recovery
 
@@ -73,3 +76,4 @@ updates for existing installs.
 | Date | State | Evidence |
 | --- | --- | --- |
 | 2026-10-31 | In progress | Documentation created before scaffold and workflow implementation. |
+| 2026-10-31 | In progress | Initial `v1` run reserved its tag, then failed because an SDK setup action requested the obsolete `tools` package. Switched to the runner's preinstalled SDK and current pinned Actions. |
