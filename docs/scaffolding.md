@@ -1,18 +1,26 @@
-# 0002 Hello world and automated APK releases specification
+# Scaffolding and release setup
 
-Decision: Accepted
+Infrastructure reference, outside the numbered product features. Recipe browsing
+remains feature 0001 and will start after scaffolding is complete.
 
-Delivery: Released
-
-## Scaffold
+## Android project
 
 Application ID: `com.miguellobato84.recetas`. Minimum, compile, and target SDK:
 API 36 (Android 16). Use Kotlin, Jetpack Compose, Java 17, and the Gradle wrapper.
-Show **Hola mundo** centered in a simple screen with app name **Recetas**.
+App name: **Recetas**.
 Use AGP 8.13.2, Gradle 8.13, Kotlin 2.2.21, Activity Compose 1.11.0, and
 Compose BOM 2025.10.01, whose AAR metadata supports this API 36 toolchain.
 Respect system insets, system font sizing, and light/dark mode. There is no
 network access, recipe content, or recipe UI in this scaffold.
+
+## Launcher icon
+
+Use an adaptive vector launcher icon: cream cookbook with spoon and herb leaf on
+a terracotta background. Keep the artwork inside the adaptive icon safe zone.
+Provide a separate monochrome layer with transparent cutouts for Pixel themed
+icons. Set the application icon in the manifest. Launcher mask shape and themed
+colors are controlled by the device. Validate resource XML and the release build;
+device launcher rendering still requires a device or emulator.
 
 ## Trigger and version allocation
 
@@ -70,10 +78,9 @@ updates for existing installs.
 - A push to `main` creates `vX` on the exact triggering commit.
 - The workflow succeeds with a downloadable artifact and GitHub Release assets.
 - The release APK's package, minimum SDK, version, and signature are verified.
-- Launching the APK displays **Hola mundo** on Android 16+.
 - The next distinct main commit uses X+1; retries keep X.
 
-## Delivery history
+## Validation history
 
 Release validation: [successful workflow](https://github.com/miguellobato84/recipes-android/actions/runs/41197965393)
 and [first published APK, v3](https://github.com/miguellobato84/recipes-android/releases/tag/v3).
@@ -94,3 +101,4 @@ screen; runtime behavior still needs device verification.
 | 2026-10-31 | In progress | Initial `v1` run reserved its tag, then failed because an SDK setup action requested the obsolete `tools` package. Switched to the runner's preinstalled SDK and current pinned Actions. |
 | 2026-10-31 | In progress | `v2` failed AAR compatibility checks; pinned Compose to a verified compatible BOM. Neither failed version published an APK. |
 | 2026-10-31 | Released | Commit `d106417`, tag `v3`: signed APK and checksum published; workflow and artifact verified. |
+| 2026-10-31 | Scaffolding update | Removed the Hello world numbered feature; retained release infrastructure here. Added color and monochrome adaptive launcher icon resources, checked XML, and inspected vector previews. Device launcher rendering remains untested. |

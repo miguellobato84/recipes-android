@@ -6,6 +6,9 @@ All feature work must be driven by the feature documents in `docs/features/`.
 Before implementing a feature or changing its behavior, read `docs/README.md`
 and the relevant proposal and specification.
 
+Scaffolding, build/release setup, and app branding are infrastructure rather than
+numbered features. For those changes, read and update `docs/scaffolding.md`.
+
 - **New feature:** create its numbered folder, `proposal.md`, and `spec.md`, and
   add it to the documentation index before writing implementation code. Define
   scope, observable behavior, and acceptance criteria first.

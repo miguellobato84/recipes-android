@@ -3,10 +3,13 @@
 Each feature has a permanent, sequential ID and a folder under `features/`.
 Keep proposals and specifications in Git alongside implementation.
 
+Scaffolding, app branding, and release infrastructure are documented in
+[scaffolding](scaffolding.md), outside the numbered product features. Feature 0001
+remains unimplemented until scaffolding is complete.
+
 | ID | Feature | Decision | Delivery | Documents |
 | --- | --- | --- | --- | --- |
 | 0001 | Read-only recipe browser | Accepted | Not started | [Proposal](features/0001-recipe-browser/proposal.md), [specification](features/0001-recipe-browser/spec.md) |
-| 0002 | Hello world and automated APK releases | Accepted | Released | [Proposal](features/0002-automated-releases/proposal.md), [specification](features/0002-automated-releases/spec.md) |
 
 ## Workflow
 

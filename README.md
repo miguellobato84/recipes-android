@@ -41,7 +41,7 @@ Android versionCode and versionName both use X. Retrying a workflow reuses its t
 CI requires `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
 `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD` repository secrets. Preserve the
 signing identity for updates; private keys and credentials must stay outside Git.
-See [release specification](docs/features/0002-automated-releases/spec.md).
+See [scaffolding and release setup](docs/scaffolding.md).
 
 ## Feature history and specifications
 

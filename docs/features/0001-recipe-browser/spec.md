@@ -73,8 +73,8 @@ require only **Actualizar**, not a new APK.
 
 Use a dedicated release signing key across updates, retain a local backup, and
 store CI signing credentials in GitHub Actions secrets. Never commit credentials
-or the private key. See [feature 0002](../0002-automated-releases/spec.md) for
-release automation and its delivery status.
+or the private key. See [scaffolding](../../scaffolding.md) for release automation
+and its delivery status.
 
 ## Acceptance criteria
 
@@ -103,13 +103,13 @@ performance results. Documentation setup alone does not validate app behavior.
 ## Open implementation questions
 
 - Recipe parsing and rendering dependencies; scaffold identity and build
-  toolchain are defined in feature 0002.
+  toolchain are defined in the scaffolding documentation.
 - Snapshot endpoint, limits, timeout, concurrent refresh handling, and durable
   cache replacement mechanism.
 - Handling an empty source, unknown future schema versions, and unsupported
   relative links or embedded assets.
 - Precise alphabetical collation, theme, launcher icon, and refresh progress UI.
-- Signing backup recovery procedure; release details belong to feature 0002.
+- Signing backup recovery procedure; release details belong to scaffolding.
 
 Resolve these before dependent implementation; they are not accepted defaults.
 

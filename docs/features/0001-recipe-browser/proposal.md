@@ -52,6 +52,6 @@ Git client on the phone. Keep recipe refresh independent of APK releases.
 | --- | --- | --- |
 | 2026-10-31 | Accept initial scope | Owner confirmed the design after discussion. |
 | 2026-10-31 | Begin with repository and documentation | App implementation is deferred until after this setup. |
-| 2026-10-31 | Release on main pushes with integer tags | Replaces tag-triggered releases; implemented by feature 0002. |
+| 2026-10-31 | Release on main pushes with integer tags | Replaces tag-triggered releases; tracked as scaffolding infrastructure. |
 
 See [the specification](spec.md) for behavior and acceptance criteria.
