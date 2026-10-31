@@ -116,8 +116,7 @@ internal object AppUpdateManager {
             throw IllegalArgumentException("Unexpected app version")
         }
         val appInfo = archive.applicationInfo ?: throw IllegalArgumentException("Missing APK metadata")
-        if (appInfo.minSdkVersion > Build.VERSION.SDK_INT ||
-            (appInfo.maxSdkVersion > 0 && appInfo.maxSdkVersion < Build.VERSION.SDK_INT)) {
+        if (appInfo.minSdkVersion > Build.VERSION.SDK_INT) {
             throw IllegalArgumentException("APK is not compatible with this Android version")
         }
         val installedSigning = installedInfo.signingInfo
