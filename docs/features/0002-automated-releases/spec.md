@@ -9,6 +9,8 @@ Delivery: In progress
 Application ID: `com.miguellobato84.recetas`. Minimum, compile, and target SDK:
 API 36 (Android 16). Use Kotlin, Jetpack Compose, Java 17, and the Gradle wrapper.
 Show **Hola mundo** centered in a simple screen with app name **Recetas**.
+Use AGP 8.13.2, Gradle 8.13, Kotlin 2.2.21, Activity Compose 1.11.0, and
+Compose BOM 2025.10.01, whose AAR metadata supports this API 36 toolchain.
 Respect system insets, system font sizing, and light/dark mode. There is no
 network access, recipe content, or recipe UI in this scaffold.
 
